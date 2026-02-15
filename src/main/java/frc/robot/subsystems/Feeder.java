@@ -17,22 +17,11 @@ public class Feeder extends SubsystemBase {
 
     public Feeder() {
         
-        feedMotor = new TalonFX(Constants.ShooterConstants.feeder);
+        feedMotor = new TalonFX(Constants.FeederConstants.feeder);
         TalonFXConfiguration feedConfigs = new TalonFXConfiguration();
         feedConfigs.CurrentLimits.withStatorCurrentLimit(40);
         feedConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
         feedMotor.getConfigurator().apply(feedConfigs);
-
-        /*setDefaultCommand(
-          runOnce(() -> {
-            setLowerFly(0.0);
-            setUpperFly(0.0);
-            setFeeder(0.0);
-          })
-          .andThen(
-            run(() -> {})
-          )
-        );*/
        
     }
 

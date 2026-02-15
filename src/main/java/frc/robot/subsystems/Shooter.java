@@ -8,60 +8,77 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
+
+
 public class Shooter extends SubsystemBase {
     
+    //Initalizes the motors
     private TalonFX lowerFlyMotor;
     private TalonFX upperFlyMotor;
 
+    //sets up velocity PID for slot 0
     final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
 
+    //Calculates the max Revolutions Per Second
     private final double RPS = 5500/60;
 
-    public Shooter() {
-        lowerFlyMotor = new TalonFX(Constants.ShooterConstants.lowerFlyWheel);
-        TalonFXConfiguration lowerConfigs = new TalonFXConfiguration();
-        lowerConfigs.CurrentLimits.withStatorCurrentLimit(40);
-        lowerConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
-        //setups the PID value for the intake
-        lowerConfigs.Slot0.kP = Constants.ShooterConstants.lower_P;
-        
-        lowerFlyMotor.getConfigurator().apply(lowerConfigs);
 
+    public Shooter() {
+        
+        //Sets settings for the Lower Flywheel
+        
+        TalonFXConfiguration globalConfigs = new TalonFXConfiguration();
+        globalConfigs.CurrentLimits.withStatorCurrentLimit(20);
+        globalConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
+        
+        //setups the PID value for the intake
+        globalConfigs.Slot0.kS = 0.1; // Add 0.1 V output to overcome static friction
+        globalConfigs.Slot0.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
+        globalConfigs.Slot0.kP = Constants.ShooterConstants.p_Value;
+        
+        lowerFlyMotor = new TalonFX(Constants.ShooterConstants.lowerFlyWheel);
+        
+        lowerFlyMotor.getConfigurator().apply(globalConfigs);
+
+        //Sets settings for Upper Flywheel
         
         upperFlyMotor = new TalonFX(Constants.ShooterConstants.upperFlyWheel);
-        TalonFXConfiguration upperConfigs = new TalonFXConfiguration();
-        upperConfigs.CurrentLimits.withStatorCurrentLimit(40);
-        upperConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
-        //setups the PID value for the shooter
-        upperConfigs.Slot0.kP = Constants.ShooterConstants.upper_P;
 
-        upperFlyMotor.getConfigurator().apply(upperConfigs);
+        upperFlyMotor.getConfigurator().apply(globalConfigs);
+
+        upperFlyMotor.setControl(new Follower(lowerFlyMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     }
 
 
+    //sets up a command for the speed of the motors
     public Command setSpeed(double OutputPercent){
       return run(
           () -> {
             setLowerFly(OutputPercent);
-            setUpperFly(OutputPercent);
-          });
+          }
+      );
+    }
+    //Made seperate because it doesn't use setControl
+    public Command stopMotors(){
+      return run(
+          () -> {
+            setLowerFly(0);
+          }
+      );
     }
 
+    //Sets the speed of the Lower Flywheel
     public void setLowerFly(double OutputPercent)
     {
       OutputPercent /= 100.0;
-      lowerFlyMotor.setControl(m_request.withVelocity(RPS*OutputPercent));
-    }
-
-     public void setUpperFly(double OutputPercent)
-    {
-      OutputPercent /= 100.0;
-      upperFlyMotor.setControl(m_request.withVelocity(RPS*-OutputPercent));      
+      lowerFlyMotor.set(OutputPercent);
+      //lowerFlyMotor.setControl(m_request.withVelocity(RPS*OutputPercent));
     }
 
 }

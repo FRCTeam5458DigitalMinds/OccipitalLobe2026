@@ -321,11 +321,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return super.samplePoseAt(Utils.fpgaToCurrentTime(timestampSeconds));
     }
 
-
-
-
-
-        //All code here done by 5458
+    
+    //All code here done by 5458
 
     //Sets up field and pigeon objects
     private final Field2d m_field = new Field2d();
@@ -400,9 +397,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 ),
                 new PPHolonomicDriveController(
                     // PID constants for translation
-                    new PIDConstants(1, 0, 0), //Change P when testing autos
+                    new PIDConstants(5, 0, 0), //Change P when testing autos
                     // PID constants for rotation
-                    new PIDConstants(7, 0, 0)
+                    new PIDConstants(5, 0, 0)
                 ),
                 config,
                 // Assume the path needs to be flipped for Red vs Blue, this is normally the case

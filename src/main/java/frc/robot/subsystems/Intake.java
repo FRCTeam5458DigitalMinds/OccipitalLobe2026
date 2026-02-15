@@ -18,7 +18,8 @@ public class Intake extends SubsystemBase {
   
   private TalonFX intakeMotor;
   private TalonFX RollerMotor;
-  
+
+  //Min, max, other number...
   private final double[] setpoints = {};
 
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
@@ -61,7 +62,7 @@ public class Intake extends SubsystemBase {
 
   }
   public Command retractCmd(){
-
+  
   }*/
 
    public void setRollers(double OutputPercent)
@@ -78,9 +79,11 @@ public class Intake extends SubsystemBase {
     }
 
      //Go to certain position based on setpoint index
-    public void toSetpoint(int setpointIndex)
+    public Command toSetpoint(int setpointIndex)
     {
-        intakeMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(0));
+        return run(
+          () -> {intakeMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(0));}
+        );
     }
 
     //testing purposes only
@@ -88,6 +91,7 @@ public class Intake extends SubsystemBase {
     {
         intakeMotor.setControl(m_request.withPosition(setPoint).withSlot(0));
     }
+
     //more testing
     public double getPosition()
     {

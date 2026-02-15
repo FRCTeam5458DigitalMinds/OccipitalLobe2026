@@ -13,9 +13,12 @@ import frc.robot.Constants;
 
 public class Indexer extends SubsystemBase {
 
+    //Initializes the Indexer Motor
     TalonFX indexerMotor;
 
     public Indexer() {
+
+        //Sets up the settings for the Indexer Motor
         indexerMotor = new TalonFX(Constants.IndexerConstants.indexMotor);
         TalonFXConfiguration indexerConfigs = new TalonFXConfiguration();
         indexerConfigs.CurrentLimits.withStatorCurrentLimit(20);
@@ -24,6 +27,8 @@ public class Indexer extends SubsystemBase {
         indexerMotor.getConfigurator().apply(indexerConfigs);
 
     }
+
+    //Sets the speed for the Indexer Motor
     public Command setSpeed(double OutputPercent){
         return run(
             () -> {
@@ -31,6 +36,7 @@ public class Indexer extends SubsystemBase {
             });
     }
 
+    //Sets the speed of the Indexer Motor
     public void setIndexer(double OutputPercent)
     {
         OutputPercent /= 100.0;

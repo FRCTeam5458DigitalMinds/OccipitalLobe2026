@@ -25,9 +25,9 @@ public class Hood extends SubsystemBase {
         hoodMotor = new TalonFX(Constants.HoodConstants.hoodMotor);
 
         TalonFXConfiguration hoodConfigs = new TalonFXConfiguration();
+
         //setups the PID value for the intake
         hoodConfigs.Slot0.kP = Constants.HoodConstants.hood_P;
-        hoodConfigs.Slot0.kI = Constants.HoodConstants.hood_I;
         hoodConfigs.Slot0.kD = Constants.HoodConstants.hood_D; 
 
         hoodConfigs.CurrentLimits.withStatorCurrentLimit(40);
@@ -35,24 +35,29 @@ public class Hood extends SubsystemBase {
 
         hoodMotor.getConfigurator().apply(hoodConfigs);
     }
-    //Set speed for now
 
+
+    //Set speed for now
     public void setHood(double OutputPercent){
         OutputPercent /= 100.0;
         hoodMotor.set(OutputPercent);
     }
 
     //Go to certain position based on setpoint index
-    public void toSetpoint(int setpointIndex)
+    public Command toSetpoint(int setpointIndex)
     {
-        hoodMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(0));
+        return runOnce(
+            () -> {hoodMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(0));}
+        );
     }
+
 
     //testing purposes only
     public void customPosition(double setPoint)
     {
         hoodMotor.setControl(m_request.withPosition(setPoint).withSlot(0));
     }
+    
     //more testing
     public double getPosition()
     {
@@ -60,8 +65,5 @@ public class Hood extends SubsystemBase {
         SmartDashboard.putNumber("Hood encoder", encoder);
         return encoder;
     }
-
-    //Min: -0.05712890625
-    //Max: 10.63232421875
 
 }

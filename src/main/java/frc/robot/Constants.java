@@ -18,7 +18,6 @@ public final class Constants {
     public static final int climbMotor = 60;
 
       public static final double climb_P = 0.0;
-      public static final double climb_I = 0.0;
       public static final double climb_D = 0.0;
   }
 
@@ -26,7 +25,6 @@ public final class Constants {
     public static final int hoodMotor = 40;
 
       public static final double hood_P = 0.0;
-      public static final double hood_I = 0.0;
       public static final double hood_D = 0.0;
   }
 
@@ -38,7 +36,6 @@ public final class Constants {
     public static final int intakeMotor = 50;
 
       public static final double intake_P = 0.0;
-      public static final double intake_I = 0.0;
       public static final double intake_D = 0.0;
     
     public static final int rollerMotor = 51;
@@ -48,15 +45,18 @@ public final class Constants {
   public static class LimelightConstants {
     public static final String ll_Name = "limelight-digital";
     public static final int pipeline = 0;    /// Night in shope (1), day in shop (0), ...
+    public static final double range = 7.0;
   }
 
   public static class ShooterConstants {
     public static final int lowerFlyWheel = 20;
-      public static final double lower_P = 1.0;
-
     public static final int upperFlyWheel = 21;
-      public static final double upper_P = 1.0;
-      
+    
+    public static final double p_Value = 0;
+    
+  }
+  
+  public static class FeederConstants {
     public static final int feeder = 22;
   }
 }

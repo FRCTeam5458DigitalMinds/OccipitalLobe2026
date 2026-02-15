@@ -3,7 +3,6 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.RawFiducial;
 import frc.robot.subsystems.*;
 
@@ -18,6 +17,8 @@ public class AutoalignRotate extends Command {
     Limelight LIMELIGHT;
     CommandSwerveDrivetrain DRIVETRAIN;
     SwerveRequest.RobotCentric robotDrive;
+
+    double range = Constants.LimelightConstants.range;
 
 
     Double maxAnglSpeed; //Max Angular Speed
@@ -104,16 +105,13 @@ public class AutoalignRotate extends Command {
                     //Runs function to get turn speed
                     double turnSpeed = LIMELIGHT.limelight_aim_proportional(maxAnglSpeed);
 
-                    SmartDashboard.putNumber("TX", LIMELIGHT.getTX());
                     SmartDashboard.putNumber("TXNC", currentTXNC);
 
-                    //Puts target speed onto smartdashboard (move to elastic)
-                    SmartDashboard.putNumber("Target turn speed", turnSpeed);
                     //Uses turn speed to run robot
                     DRIVETRAIN.setControl(robotDrive.withRotationalRate(turnSpeed));
 
                     //If crosshair is between these horizontal values , stop
-                    if (-7.0 < LIMELIGHT.getTX() && LIMELIGHT.getTX() < 7.0){
+                    if (-range < LIMELIGHT.getTX() && LIMELIGHT.getTX() < range){
                         isCentered = true;
                     }
 

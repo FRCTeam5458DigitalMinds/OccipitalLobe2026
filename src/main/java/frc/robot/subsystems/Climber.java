@@ -26,7 +26,6 @@ public class Climber extends SubsystemBase {
         TalonFXConfiguration climbConfigs = new TalonFXConfiguration();
         //setups the PID value for the intake
         climbConfigs.Slot0.kP = Constants.ClimbConstants.climb_P;
-        climbConfigs.Slot0.kI = Constants.ClimbConstants.climb_I;
         climbConfigs.Slot0.kD = Constants.ClimbConstants.climb_D; 
 
         climbConfigs.CurrentLimits.withStatorCurrentLimit(40);
