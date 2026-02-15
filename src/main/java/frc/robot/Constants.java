@@ -47,12 +47,16 @@ public final class Constants {
 
   public static class LimelightConstants {
     public static final String ll_Name = "limelight-digital";
-    public static final int pipeline = 1;    /// Night in shope (1), day in shop (0), ...
+    public static final int pipeline = 0;    /// Night in shope (1), day in shop (0), ...
   }
 
   public static class ShooterConstants {
     public static final int lowerFlyWheel = 20;
+      public static final double lower_P = 1.0;
+
     public static final int upperFlyWheel = 21;
+      public static final double upper_P = 1.0;
+      
     public static final int feeder = 22;
   }
 }

@@ -43,6 +43,8 @@ public class Intake extends SubsystemBase {
         //
         TalonFXConfiguration RollerConfigs = new TalonFXConfiguration();
         RollerConfigs.CurrentLimits.withStatorCurrentLimit(40);
+        RollerConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
+
         RollerConfigs.Voltage.withPeakForwardVoltage(8);
         RollerConfigs.TorqueCurrent.withPeakForwardTorqueCurrent(20)
             .withPeakReverseTorqueCurrent(-20);
@@ -53,6 +55,14 @@ public class Intake extends SubsystemBase {
 
 
   }
+
+  /*public Command intakeCmd(){
+    return runOnce(null)
+
+  }
+  public Command retractCmd(){
+
+  }*/
 
    public void setRollers(double OutputPercent)
     {

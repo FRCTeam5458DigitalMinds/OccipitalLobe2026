@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -16,11 +17,12 @@ public class Hood extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
 
   TalonFX hoodMotor;
-  private final double[] setpoints = {};
+  //min, max, (later numbers)
+  private final double[] setpoints = {-0.05712890625, 10.63232421875};
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
 
   public Hood() {
-        hoodMotor = new TalonFX(Constants.ClimbConstants.climbMotor);
+        hoodMotor = new TalonFX(Constants.HoodConstants.hoodMotor);
 
         TalonFXConfiguration hoodConfigs = new TalonFXConfiguration();
         //setups the PID value for the intake
@@ -33,6 +35,7 @@ public class Hood extends SubsystemBase {
 
         hoodMotor.getConfigurator().apply(hoodConfigs);
     }
+    //Set speed for now
 
     public void setHood(double OutputPercent){
         OutputPercent /= 100.0;
@@ -53,7 +56,12 @@ public class Hood extends SubsystemBase {
     //more testing
     public double getPosition()
     {
-        return hoodMotor.getPosition().getValueAsDouble();
+        double encoder = hoodMotor.getPosition().getValueAsDouble();
+        SmartDashboard.putNumber("Hood encoder", encoder);
+        return encoder;
     }
+
+    //Min: -0.05712890625
+    //Max: 10.63232421875
 
 }

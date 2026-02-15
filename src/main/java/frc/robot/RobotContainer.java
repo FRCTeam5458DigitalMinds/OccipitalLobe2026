@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.generated.TunerConstants;
@@ -41,6 +42,8 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public final Climber m_Climber = new Climber();
+
+    public final Feeder m_Feeder = new Feeder();
     
     public final Hood m_Hood = new Hood();
 
@@ -107,11 +110,18 @@ public class RobotContainer {
             )
         );
 
-        /*m_Indexer.setDefaultCommand(
-            m_Indexer.runOnce(
-                () -> {m_Indexer.setIndexer(0);}
-            ).andThen(run(() -> {}))
-        );*/
+        m_Shooter.setDefaultCommand(
+            m_Shooter.setSpeed(0)
+        );
+
+        m_Feeder.setDefaultCommand(
+            m_Feeder.setSpeed(0)
+        );
+        m_Indexer.setDefaultCommand(
+            m_Indexer.setSpeed(0)
+        );
+
+
 
         //m_Hood.setDefaultCommand(/*put hood down*/);
 
@@ -126,33 +136,49 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         // Controls
-        joystick.y().whileTrue(new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate));
+        //joystick.y().whileTrue(new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate));
 
-        //Test indexer
-        joystick.axisGreaterThan(3,0.05).whileTrue(
-            m_Indexer.runEnd(
-                () -> {m_Indexer.setIndexer(10);},
-                () -> {m_Indexer.setIndexer(0);}
-            )
-        );
-        //Test intake
-        joystick.leftTrigger(0.05).whileTrue(
+        //Test intake (change to left trigger)
+        joystick.povUp().whileTrue(
             m_Intake.runEnd(
-                () -> {m_Intake.setIntake(0.01);}, 
-                () -> {m_Intake.setIntake(0.01);}
+                () -> {m_Intake.setIntake(5);}, 
+                () -> {m_Intake.setIntake(0);}
             )
         );
 
-        //Get position of 
+        joystick.povDown().whileTrue(
+            m_Intake.runEnd(
+                () -> {m_Intake.setIntake(-5);}, 
+                () -> {m_Intake.setIntake(0);}
+            )
+        );
+
+
+        //Get position of intake encoder at position
         joystick.x().whileTrue(
             m_Intake.runOnce(() -> m_Intake.getPosition())
         );
-        
-        //Run shooter
-        /*joystick.axisGreaterThan(3,0.05).whileTrue(
-            m_Shooter.runEnd(setSpeed(10));
+
+        //Test hood
+        joystick.a().whileTrue(
+            m_Hood.runEnd(
+                () -> {m_Hood.setHood(-5);},
+                () -> {m_Hood.setHood(0);}
+            )
+        );
+        joystick.y().whileTrue(
+            m_Hood.runEnd(
+                () -> {m_Hood.setHood(5);},
+                () -> {m_Hood.setHood(0);}
+            )
+        );
+
+        joystick.b().whileTrue(
+            m_Hood.runOnce(() -> {m_Hood.getPosition();})
+        );
 
 
+    
 
 
         //Run climb
@@ -170,8 +196,19 @@ public class RobotContainer {
                 () -> {m_Intake.setRollers(0); m_Intake.toSetpoint(0);}
             )
         );*/
-
     
+        joystick.rightTrigger(0.05).whileTrue(
+            Commands.parallel(
+                m_Shooter.setSpeed(42),
+                Commands.waitSeconds(1)
+                .andThen(
+                    Commands.parallel(
+                        m_Feeder.setSpeed(65),
+                        m_Indexer.setSpeed(65)
+                    )
+                )
+            )
+        );
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

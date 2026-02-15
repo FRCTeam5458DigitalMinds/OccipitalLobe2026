@@ -5,6 +5,8 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,13 +17,19 @@ public class Shooter extends SubsystemBase {
     
     private TalonFX lowerFlyMotor;
     private TalonFX upperFlyMotor;
-    private TalonFX feedMotor;
+
+    final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
+
+    private final double RPS = 5500/60;
 
     public Shooter() {
         lowerFlyMotor = new TalonFX(Constants.ShooterConstants.lowerFlyWheel);
         TalonFXConfiguration lowerConfigs = new TalonFXConfiguration();
         lowerConfigs.CurrentLimits.withStatorCurrentLimit(40);
         lowerConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
+        //setups the PID value for the intake
+        lowerConfigs.Slot0.kP = Constants.ShooterConstants.lower_P;
+        
         lowerFlyMotor.getConfigurator().apply(lowerConfigs);
 
         
@@ -29,47 +37,31 @@ public class Shooter extends SubsystemBase {
         TalonFXConfiguration upperConfigs = new TalonFXConfiguration();
         upperConfigs.CurrentLimits.withStatorCurrentLimit(40);
         upperConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
+        //setups the PID value for the shooter
+        upperConfigs.Slot0.kP = Constants.ShooterConstants.upper_P;
+
         upperFlyMotor.getConfigurator().apply(upperConfigs);
-
-        feedMotor = new TalonFX(Constants.ShooterConstants.feeder);
-        TalonFXConfiguration feedConfigs = new TalonFXConfiguration();
-        feedConfigs.CurrentLimits.withStatorCurrentLimit(40);
-        feedConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
-        feedMotor.getConfigurator().apply(feedConfigs);
-
-        setDefaultCommand(
-          runOnce(
-              () -> {
-              setLowerFly(0);
-              setUpperFly(0);   
-              setFeeder(0);         
-            }).andThen(run(() -> {})));
     }
+
 
     public Command setSpeed(double OutputPercent){
       return run(
           () -> {
-            lowerFlyMotor.set(OutputPercent);
-            upperFlyMotor.set(OutputPercent);
-            feedMotor.set(OutputPercent);
+            setLowerFly(OutputPercent);
+            setUpperFly(OutputPercent);
           });
     }
+
     public void setLowerFly(double OutputPercent)
     {
-      OutputPercent /= 100.;
-      lowerFlyMotor.set(OutputPercent);
+      OutputPercent /= 100.0;
+      lowerFlyMotor.setControl(m_request.withVelocity(RPS*OutputPercent));
     }
 
      public void setUpperFly(double OutputPercent)
     {
-      OutputPercent /= 100.;
-      upperFlyMotor.set(-OutputPercent);
-    }
-
-     public void setFeeder(double OutputPercent)
-    {
-      OutputPercent /= 100.;
-      feedMotor.set(-OutputPercent);
+      OutputPercent /= 100.0;
+      upperFlyMotor.setControl(m_request.withVelocity(RPS*-OutputPercent));      
     }
 
 }
