@@ -17,10 +17,9 @@ public class Intake extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   
   private TalonFX intakeMotor;
-  private TalonFX RollerMotor;
 
   //Min, max, other number...
-  private final double[] setpoints = {};
+  private final double[] setpoints = {-0.115234375,17.18115234375};
 
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
 
@@ -29,30 +28,17 @@ public class Intake extends SubsystemBase {
 
     //Set up motors
         intakeMotor = new TalonFX(Constants.IntakeConstants.intakeMotor);
-        RollerMotor = new TalonFX(Constants.IntakeConstants.rollerMotor);
         
         TalonFXConfiguration intakeConfigs = new TalonFXConfiguration();
         //setups the PID value for the intake
-        intakeConfigs.Slot0.kP = 0;
-        intakeConfigs.Slot0.kI = 0;
-        intakeConfigs.Slot0.kD = 0; 
+        intakeConfigs.Slot0.kP = Constants.IntakeConstants.intake_P;
+        intakeConfigs.Slot0.kD = Constants.IntakeConstants.intake_D; 
 
         //Setups current limits
-        intakeConfigs.CurrentLimits.withStatorCurrentLimit(40);
+        intakeConfigs.CurrentLimits.withStatorCurrentLimit(70);
         intakeConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
 
-        //
-        TalonFXConfiguration RollerConfigs = new TalonFXConfiguration();
-        RollerConfigs.CurrentLimits.withStatorCurrentLimit(40);
-        RollerConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
-
-        RollerConfigs.Voltage.withPeakForwardVoltage(8);
-        RollerConfigs.TorqueCurrent.withPeakForwardTorqueCurrent(20)
-            .withPeakReverseTorqueCurrent(-20);
-
         intakeMotor.getConfigurator().apply(intakeConfigs);
-        RollerMotor.getConfigurator().apply(RollerConfigs);
-
 
 
   }
@@ -65,12 +51,6 @@ public class Intake extends SubsystemBase {
   
   }*/
 
-   public void setRollers(double OutputPercent)
-    {
-      OutputPercent /= 100.;
-      RollerMotor.set(OutputPercent);
-    }
-
     //Negative means extends
     public void setIntake(double OutputPercent)
     {
@@ -79,12 +59,11 @@ public class Intake extends SubsystemBase {
     }
 
      //Go to certain position based on setpoint index
-    public Command toSetpoint(int setpointIndex)
+    public void toSetpoint(int setpointIndex)
     {
-        return run(
-          () -> {intakeMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(0));}
-        );
+        intakeMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(0));
     }
+
 
     //testing purposes only
     public void customPosition(double setPoint)
@@ -99,4 +78,6 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putNumber("Intake Position", intakeEncoder);
         return intakeEncoder;
     }
+    //Min: 2.1435546875
+    //Max: 17.18115234375
 }

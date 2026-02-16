@@ -23,7 +23,7 @@ public class Shooter extends SubsystemBase {
     private TalonFX upperFlyMotor;
 
     //sets up velocity PID for slot 0
-    final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
+    //final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
 
     //Calculates the max Revolutions Per Second
     private final double RPS = 5500/60;
@@ -34,13 +34,13 @@ public class Shooter extends SubsystemBase {
         //Sets settings for the Lower Flywheel
         
         TalonFXConfiguration globalConfigs = new TalonFXConfiguration();
-        globalConfigs.CurrentLimits.withStatorCurrentLimit(20);
+        globalConfigs.CurrentLimits.withStatorCurrentLimit(40);
         globalConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
         
         //setups the PID value for the intake
-        globalConfigs.Slot0.kS = 0.1; // Add 0.1 V output to overcome static friction
-        globalConfigs.Slot0.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
-        globalConfigs.Slot0.kP = Constants.ShooterConstants.p_Value;
+        //globalConfigs.Slot0.kS = 0.1; // Add 0.1 V output to overcome static friction
+        //globalConfigs.Slot0.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
+        //globalConfigs.Slot0.kP = Constants.ShooterConstants.p_Value;
         
         lowerFlyMotor = new TalonFX(Constants.ShooterConstants.lowerFlyWheel);
         

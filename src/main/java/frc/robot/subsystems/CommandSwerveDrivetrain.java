@@ -145,6 +145,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
         configureAutoBuilder();
+        //Puts field onto Elastic
+        SmartDashboard.putData("Field", m_field);
 
     }
 

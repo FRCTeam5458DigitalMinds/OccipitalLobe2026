@@ -24,11 +24,14 @@ public class Limelight extends SubsystemBase{
    //info from tag
    int id;
 
+   int selectedPipeline;
+
 //pose thingys
    private LimelightHelpers.PoseEstimate limelightMeasurement = new LimelightHelpers.PoseEstimate();
 
    public Limelight(){   
-      //
+   
+      //selectedPipeline = SmartDashboard.getNumber("Pipeline Chooser_selected", 0)
       LimelightHelpers.setPipelineIndex(dmllName,Constants.LimelightConstants.pipeline);
    }
    //Change smartdashboard to elastic later

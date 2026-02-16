@@ -53,10 +53,14 @@ public class RobotContainer {
 
     public final Limelight m_Limelight = new Limelight();
 
+    public final Roller m_Roller = new Roller();
+
     public final Shooter m_Shooter = new Shooter();
 
     
     private final SendableChooser<Command> autoChooser2;
+
+    private final SendableChooser<Integer> limelightPipelineChooser;
 
     private final int redConst = -1;
     private int sideConst = -1;
@@ -114,6 +118,14 @@ public class RobotContainer {
         
         SmartDashboard.putData("Auto Chooser", autoChooser2); 
 
+        limelightPipelineChooser = new SendableChooser<>();
+
+        limelightPipelineChooser.setDefaultOption("Day", 0);
+        limelightPipelineChooser.addOption("Night", 1);
+        limelightPipelineChooser.addOption("Comp", 2);
+
+        SmartDashboard.putData("Pipeline Chooser", limelightPipelineChooser);
+
         configureBindings();
     }
 
@@ -142,6 +154,10 @@ public class RobotContainer {
             m_Indexer.setSpeed(0)
         );
 
+        m_Roller.setDefaultCommand(
+            m_Roller.setSpeed(0)
+        );
+
         m_Shooter.setDefaultCommand(
             m_Shooter.stopMotors()
         );
@@ -164,7 +180,7 @@ public class RobotContainer {
         //Test intake (change to left trigger)
         joystick.povUp().whileTrue(
             m_Intake.runEnd(
-                () -> {m_Intake.setIntake(5);}, 
+                () -> {m_Intake.setIntake(90);}, 
                 () -> {m_Intake.setIntake(0);}
             )
         );
@@ -173,7 +189,7 @@ public class RobotContainer {
         //Testing purposes only
         joystick.povDown().whileTrue(
             m_Intake.runEnd(
-                () -> {m_Intake.setIntake(-5);}, 
+                () -> {m_Intake.setIntake(-90);}, 
                 () -> {m_Intake.setIntake(0);}
             )
         );
@@ -210,7 +226,7 @@ public class RobotContainer {
 
         //Test spindexer
         joystick.povLeft().whileTrue(
-            m_Indexer.setSpeed(65)
+            m_Roller.setSpeed(80)
         );
 
 
@@ -231,7 +247,16 @@ public class RobotContainer {
                 () -> {m_Intake.setRollers(0); m_Intake.toSetpoint(0);}
             )
         );*/
-    
+
+        //Extends intake
+        joystick.leftTrigger(0.05).whileTrue(
+            Commands.parallel(
+                m_Intake.run(
+                    () -> {m_Intake.toSetpoint(1);}
+                ),
+                m_Roller.setSpeed(80)
+            )
+        );
 
         //Runs Shooter, waits, then runs the Feeder and Indexer
         joystick.rightTrigger(0.05).whileTrue(
