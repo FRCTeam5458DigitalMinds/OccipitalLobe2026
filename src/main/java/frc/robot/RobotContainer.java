@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.generated.TunerConstants;
 
 import frc.robot.subsystems.*;
+import frc.robot.Constants.LimelightConstants;
 import frc.robot.commands.*;
 
 public class RobotContainer {
@@ -50,6 +51,8 @@ public class RobotContainer {
     public final Indexer m_Indexer = new Indexer();
 
     public final Intake m_Intake = new Intake();
+
+    public final LED m_LED = new LED();
 
     public final Limelight m_Limelight = new Limelight();
 
@@ -126,6 +129,8 @@ public class RobotContainer {
 
         SmartDashboard.putData("Pipeline Chooser", limelightPipelineChooser);
 
+        LimelightConstants.pipeline = limelightPipelineChooser.getSelected();
+
         configureBindings();
     }
 
@@ -154,6 +159,10 @@ public class RobotContainer {
             m_Indexer.setSpeed(0)
         );
 
+        m_LED.setDefaultCommand(
+            m_LED.LEDoff()
+        );
+
         m_Roller.setDefaultCommand(
             m_Roller.setSpeed(0)
         );
@@ -161,6 +170,7 @@ public class RobotContainer {
         m_Shooter.setDefaultCommand(
             m_Shooter.stopMotors()
         );
+
 
 
         // Idle while the robot is disabled. This ensures the configured
@@ -224,27 +234,11 @@ public class RobotContainer {
             m_Hood.runOnce(() -> {m_Hood.getPosition();})
         );
 
-        //Test spindexer
-        joystick.povLeft().whileTrue(
-            m_Roller.setSpeed(80)
-        );
-
-
-
-
         //Run climb
         /*joystick.povUp().whileTrue(
             m_Climber.runEnd(
                 () -> {}, 
                 () -> {}
-            )
-        );*/
-
-        //run intake
-        /*joystick.axisGreaterThan(2, 0.05).whileTrue(
-            m_Intake.runEnd( //REMEMBER TO CHANGE SET POINT VALUE
-                () -> {m_Intake.setRollers(60); m_Intake.toSetpoint(0); }, 
-                () -> {m_Intake.setRollers(0); m_Intake.toSetpoint(0);}
             )
         );*/
 
@@ -258,6 +252,12 @@ public class RobotContainer {
             )
         );
 
+        /*joystick.leftBumper().whileTrue(
+            m_Intake.run(
+                () -> {m_Intake.toSetpoint(1);}
+            )
+        );*/
+
         //Runs Shooter, waits, then runs the Feeder and Indexer
         joystick.rightTrigger(0.05).whileTrue(
             Commands.parallel(
@@ -269,6 +269,7 @@ public class RobotContainer {
                         m_Feeder.setSpeed(65),
                         m_Indexer.setSpeed(65)
                     )
+                    .andThen(m_LED.blink().repeatedly())
                 )
             )
         );
@@ -294,8 +295,7 @@ public class RobotContainer {
     }
 
     
-    /* Remove comment later:
     public Command getAutonomousCommand() {
         return autoChooser2.getSelected();
-    } */
+    }
 }

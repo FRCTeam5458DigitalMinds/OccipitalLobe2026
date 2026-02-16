@@ -12,6 +12,7 @@ import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.RawFiducial;
 import frc.robot.Constants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.RobotContainer;
 
 public class Limelight extends SubsystemBase{
    //SwerveDrive class
@@ -24,14 +25,13 @@ public class Limelight extends SubsystemBase{
    //info from tag
    int id;
 
-   int selectedPipeline;
+   double selectedPipeline;
 
 //pose thingys
    private LimelightHelpers.PoseEstimate limelightMeasurement = new LimelightHelpers.PoseEstimate();
 
    public Limelight(){   
-   
-      //selectedPipeline = SmartDashboard.getNumber("Pipeline Chooser_selected", 0)
+      //selectedPipeline = 
       LimelightHelpers.setPipelineIndex(dmllName,Constants.LimelightConstants.pipeline);
    }
    //Change smartdashboard to elastic later

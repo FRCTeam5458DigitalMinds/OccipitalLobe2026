@@ -35,7 +35,7 @@ public final class Constants {
   public static class IntakeConstants {
     public static final int intakeMotor = 50;
 
-      public static final double intake_P = 0.0;
+      public static final double intake_P = 0.25;
       public static final double intake_D = 0.0;
     
     public static final int rollerMotor = 51;
@@ -44,7 +44,7 @@ public final class Constants {
 
   public static class LimelightConstants {
     public static final String ll_Name = "limelight-digital";
-    public static final int pipeline = 0;    /// Night in shope (1), day in shop (0), ...
+    public static int pipeline = 0;    /// Night in shope (1), day in shop (0), ...
     public static final double range = 7.0;
   }
 
