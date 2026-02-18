@@ -18,7 +18,7 @@ public class Hood extends SubsystemBase {
 
   TalonFX hoodMotor;
   //min, max, (later numbers)
-  private final double[] setpoints = {-0.05712890625, 10.63232421875};
+  private final double[] setpoints = {-0.05712890625+0.01, 10.63232421875-0.1};
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
 
   public Hood() {

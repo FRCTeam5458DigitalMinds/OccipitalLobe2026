@@ -41,7 +41,6 @@ public class AutoalignRotate extends Command {
         
     }
 
-
     //runs 
     public void execute()
     {

@@ -44,7 +44,11 @@ public class AdjustShooter extends Command {
         //Put more data points
         hoodAngle.put(0.0,0.0);
         
-
+        /*notes form 2/17
+        From Outpost:
+           Hood: 8.3916015625
+           Shooter: 80%
+        */
     }
 
     public void initialize()
