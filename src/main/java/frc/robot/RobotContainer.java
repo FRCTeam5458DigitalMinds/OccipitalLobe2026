@@ -93,7 +93,7 @@ public class RobotContainer {
             "Start Shoot", 
             Commands.parallel(
                 //note: speed needed directly in front of the tower
-                m_Shooter.setSpeed(42),
+                //m_Shooter.setSpeed(42),
                 Commands.waitSeconds(0.5)
                 .andThen(
                     Commands.parallel(
@@ -169,6 +169,7 @@ public class RobotContainer {
 
         m_Shooter.setDefaultCommand(
             m_Shooter.stopMotors()
+            //m_Shooter.PIDstopMotors()
         );
 
 
@@ -246,7 +247,7 @@ public class RobotContainer {
         joystick.leftTrigger(0.05).whileTrue(
             Commands.parallel(
                 m_Intake.run(
-                    () -> {m_Intake.toSetpoint(1);}
+                    () -> {m_Intake.toSetpoint(0);}
                 ),
                 m_Roller.setSpeed(80)
             )
@@ -262,25 +263,30 @@ public class RobotContainer {
         joystick.rightTrigger(0.05).whileTrue(
             Commands.parallel(
                 //note: speed needed directly in front of the tower
-                m_Shooter.setSpeed(60), //
+                //m_Shooter.setSpeed(46), //
+                m_Shooter.PIDrunMotors(37),
                 Commands.waitSeconds(1)
                 .andThen(
                     Commands.parallel(
                         m_Feeder.setSpeed(65), //
                         m_Indexer.setSpeed(65)
                     )
-                    .andThen(m_LED.blink().repeatedly())
+                    /*.andThen(m_Intake.run(
+                            () -> {m_Intake.set(70);}
+                        ).until(m_Intake.getPosition > -16.701171875 + 1 )
+                    )
+                    //.andThen(m_LED.blink().repeatedly())*/
                 )
             )
         );
 
         //Same as above but for feed mode
-        joystick.rightBumper().whileTrue(
+        /*joystick.rightBumper().whileTrue(
             Commands.parallel(
                 //note: speed needed directly in front of the tower
                 Commands.parallel(
                     m_Hood.toSetpoint(1),
-                    m_Shooter.setSpeed(42)),
+                    m_Shooter.setSpeed(1100)),
                 Commands.waitSeconds(0.5)
                 .andThen(
                     Commands.parallel(
@@ -289,7 +295,7 @@ public class RobotContainer {
                     )
                 )
             )
-        );
+        );*/
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

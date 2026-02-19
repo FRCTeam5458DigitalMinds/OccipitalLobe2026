@@ -38,4 +38,7 @@ public class Temp_Command extends Command {
     {
       return true;
     }
+
+    //public boolean end(something interupted){
+    //} 
 }

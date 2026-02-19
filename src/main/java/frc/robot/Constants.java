@@ -52,8 +52,15 @@ public final class Constants {
     public static final int lowerFlyWheel = 20;
     public static final int upperFlyWheel = 21;
     
-    public static final double p_Value = 0;
-    
+
+    public static final int kraken_RPS = 6000/60;
+
+    public static final double s_Value = 0.1;
+    public static final double v_Value = 0.10;
+    public static final double p_Value = 1.5; //1.4 is standard
+    public static final double i_Value = 0.0;
+    public static final double d_Value = 0.0;
+
   }
   
   public static class FeederConstants {

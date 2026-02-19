@@ -10,10 +10,18 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants;
+import frc.robot.Constants.ShooterConstants;
+
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+
 
 
 
@@ -24,13 +32,31 @@ public class Shooter extends SubsystemBase {
     private TalonFX upperFlyMotor;
 
     //sets up velocity PID for slot 0
-    //final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
+    final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
 
     //Calculates the max Revolutions Per Second
-    private final double RPS = 5500/60;
+    private final double maxRPM = 5500;
+    /*Notes:
+    10%: 550
+    20%  1100
+    30%  1650
+    40%  2200
+    50%  2750
+    60%  3300
+    70%  3850
+    80%  4400
+    90%  4950
+    100% 5500
+    */
+    /*private final SimpleMotorFeedforward m_shooterFeedforward =
+      new SimpleMotorFeedforward(
+          ShooterConstants.kSVolts, ShooterConstants.kVVoltSecondsPerRotation);
 
+    private final PIDController m_shooterFeedback = new PIDController(Constants.ShooterConstants.p_Value, 0.0, 0.0);*/
 
     public Shooter() {
+
+        //m_shooterFeedback.setTolerance(Constants.ShooterConstants.kShooterToleranceRPS);
         
         //Sets settings for the Lower Flywheel
         
@@ -39,9 +65,15 @@ public class Shooter extends SubsystemBase {
         globalConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
         
         //setups the PID value for the intake
-        //globalConfigs.Slot0.kS = 0.1; // Add 0.1 V output to overcome static friction
-        //globalConfigs.Slot0.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
-        //globalConfigs.Slot0.kP = Constants.ShooterConstants.p_Value;
+      
+        globalConfigs.Slot0.kS = Constants.ShooterConstants.s_Value;
+        globalConfigs.Slot0.kV = Constants.ShooterConstants.v_Value; // A velocity target of 1 rps results in 0.12 V output
+        globalConfigs.Slot0.kP = Constants.ShooterConstants.p_Value;
+        globalConfigs.Slot0.kI = Constants.ShooterConstants.i_Value;
+        globalConfigs.Slot0.kD = Constants.ShooterConstants.d_Value;
+
+        globalConfigs.Voltage.withPeakForwardVoltage(8)
+        .withPeakReverseVoltage(-8);
         
         lowerFlyMotor = new TalonFX(Constants.ShooterConstants.lowerFlyWheel);
         
@@ -56,12 +88,12 @@ public class Shooter extends SubsystemBase {
         upperFlyMotor.setControl(new Follower(lowerFlyMotor.getDeviceID(), MotorAlignmentValue.Opposed));
     }
 
-
-    //sets up a command for the speed of the motors
-    public Command setSpeed(double OutputPercent){
+  
+    /*//sets up a command for the speed of the motors
+    public Command setSpeed(double percent){
       return run(
           () -> {
-            setLowerFly(OutputPercent);
+            setLowerFly(percent);
           }
       );
     }
@@ -81,6 +113,28 @@ public class Shooter extends SubsystemBase {
       lowerFlyMotor.set(OutputPercent);
       SmartDashboard.putNumber("Flywheel speed", OutputPercent);
       //lowerFlyMotor.setControl(m_request.withVelocity(RPS*OutputPercent));
+    }*/
+    
+
+ 
+    public Command PIDrunMotors(double FlyRPS){
+      return run(
+          () -> {
+            setTargetRPM(FlyRPS);
+          }
+      );
+    }
+    public Command stopMotors(){
+      return run(
+          () -> {
+            lowerFlyMotor.set(0);
+          }
+      );
+    }
+
+    public void setTargetRPM(double RPS){
+      SmartDashboard.putNumber("RPS", lowerFlyMotor.getVelocity().getValueAsDouble());
+      lowerFlyMotor.setControl(m_request.withVelocity(RPS));
     }
 
 }
