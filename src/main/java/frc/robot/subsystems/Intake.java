@@ -19,7 +19,7 @@ public class Intake extends SubsystemBase {
   private TalonFX intakeMotor;
 
   //max extenstion, min extension, other number...
-  private final double[] setpoints = {0.66015625,-16.701171875};
+  private final double[] setpoints = {0.45970703125,-16.701171875};
 
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
 
@@ -78,6 +78,4 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putNumber("Intake Position", intakeEncoder);
         return intakeEncoder;
     }
-    //Min: 2.1435546875
-    //Max: 17.18115234375
 }

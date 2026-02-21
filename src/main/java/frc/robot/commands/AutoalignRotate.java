@@ -110,7 +110,7 @@ public class AutoalignRotate extends Command {
                     DRIVETRAIN.setControl(robotDrive.withRotationalRate(turnSpeed));
 
                     //If crosshair is between these horizontal values , stop
-                    if (-range < LIMELIGHT.getTX() && LIMELIGHT.getTX() < range){
+                    if (-5 < LIMELIGHT.getTX() && LIMELIGHT.getTX() < 9){
                         isCentered = true;
                     }
 

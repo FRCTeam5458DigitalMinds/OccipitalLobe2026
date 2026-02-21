@@ -35,7 +35,7 @@ public final class Constants {
   public static class IntakeConstants {
     public static final int intakeMotor = 50;
 
-      public static final double intake_P = 0.25;
+      public static final double intake_P = 0.5;
       public static final double intake_D = 0.0;
     
     public static final int rollerMotor = 51;
