@@ -18,8 +18,6 @@ public class AutoalignRotate extends Command {
     CommandSwerveDrivetrain DRIVETRAIN;
     SwerveRequest.RobotCentric robotDrive;
 
-    double range = Constants.LimelightConstants.range;
-
 
     Double maxAnglSpeed; //Max Angular Speed
 

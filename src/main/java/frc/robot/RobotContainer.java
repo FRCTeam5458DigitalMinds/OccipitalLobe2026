@@ -207,9 +207,9 @@ public class RobotContainer {
 
 
         //Get position of intake encoder at position
-        joystick.x().whileTrue(
+        /*joystick.x().whileTrue(
             m_Intake.runOnce(() -> m_Intake.getPosition())
-        );
+        );*/
 
 
         //Test hood
@@ -262,9 +262,7 @@ public class RobotContainer {
         //Runs Shooter, waits, then runs the Feeder and Indexer
         joystick.rightTrigger(0.05).whileTrue(
             Commands.parallel(
-                //note: speed needed directly in front of the tower
-                //m_Shooter.setSpeed(46), //
-                m_Shooter.PIDrunMotors(32), //37 is max
+                m_Shooter.PIDrunMotors(35),
                 Commands.waitSeconds(1)
                 .andThen(
                     Commands.parallel(
@@ -279,7 +277,9 @@ public class RobotContainer {
                 )
             )
         );
-
+        joystick.x().whileTrue(
+            m_Limelight.runOnce(() -> {m_Limelight.getDistToNearestTag();})
+        );
         //Same as above but for feed mode
         /*joystick.rightBumper().whileTrue(
             Commands.parallel(
@@ -296,6 +296,23 @@ public class RobotContainer {
                 )
             )
         );*/
+        joystick.rightBumper().whileTrue(
+            Commands.parallel(
+                new AdjustShooter(m_Hood,m_Shooter,m_Limelight),
+                Commands.waitSeconds(1)
+                .andThen(
+                    Commands.parallel(
+                        m_Feeder.setSpeed(65), //
+                        m_Indexer.setSpeed(65)
+                    )
+                    /*.andThen(m_Intake.run(
+                            () -> {m_Intake.set(70);}
+                        ).until(m_Intake.getPosition > -16.701171875 + 1 )
+                    )
+                    //.andThen(m_LED.blink().repeatedly())*/
+                )
+            )
+        );
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

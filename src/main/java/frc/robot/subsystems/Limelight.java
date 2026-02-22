@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
@@ -71,6 +72,59 @@ public class Limelight extends SubsystemBase{
       dTarget = LimelightHelpers.getFiducialID(dmllName);
       SmartDashboard.putNumber("LL-ID", dTarget);
       return dTarget;
+   }
+
+   public Double getDistToNearestTag(){
+
+      double distance = 0;
+      int crtTargetID = 0;
+      double halfofBumper = 0.87/2;
+      
+      RawFiducial[] currentFiducials = getFiducialData(); //this is the raw data from the limelight
+        List<Integer> alCurrentTargetsIDs = new ArrayList<>(); //sets up list of IDs for the field
+
+        for (RawFiducial fiducial : currentFiducials) {//moves raw fiducial ids to target ids
+
+            alCurrentTargetsIDs.add(fiducial.id);
+        }
+
+        //groups tags & picks a tag
+        if (alCurrentTargetsIDs.contains(5) && alCurrentTargetsIDs.contains(8) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
+            crtTargetID = 9;
+        }
+        else if (alCurrentTargetsIDs.contains(2) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11)){
+            crtTargetID = 11;
+        }
+        else if (alCurrentTargetsIDs.contains(8) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
+            crtTargetID = 9;
+        }
+        else if (alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11) && alCurrentTargetsIDs.contains(2)){
+            crtTargetID = 11;
+        }
+        else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11)){
+            crtTargetID = 10;
+        }
+        else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
+            crtTargetID = 10;
+        }
+        else if (alCurrentTargetsIDs.contains(11) && alCurrentTargetsIDs.contains(2)){
+            crtTargetID = 11;
+        }
+        else if (alCurrentTargetsIDs.contains(10)){
+            crtTargetID = 10;
+        }
+        
+        RawFiducial[] crtFiducials = getFiducialData();
+
+      //moves raw fiducial to current target ids, takes only tx of the current target id    
+         for (RawFiducial fiducial : crtFiducials) {
+
+                if (fiducial.id == crtTargetID){
+                    distance = fiducial.distToRobot; // X offset (no crosshair)
+               }
+         }
+      SmartDashboard.putNumber("Dist to Robot", distance - halfofBumper);
+      return distance - halfofBumper;
    }
    
   public double limelight_aim_proportional(Double robotMaxAngularSpeed){    

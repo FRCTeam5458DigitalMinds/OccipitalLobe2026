@@ -17,8 +17,9 @@ public class AdjustShooter extends Command {
     Hood HOOD;
     Shooter SHOOTER;
     Limelight LIMELIGHT;
+
     
-    InterpolatingDoubleTreeMap shooterRPM;
+    InterpolatingDoubleTreeMap shooterRPS;
     InterpolatingDoubleTreeMap hoodAngle;
 
 
@@ -32,95 +33,38 @@ public class AdjustShooter extends Command {
         addRequirements(shooter);
         addRequirements(limelight);
         
-        shooterRPM = new InterpolatingDoubleTreeMap();
-
+        shooterRPS = new InterpolatingDoubleTreeMap();
         //Key: distance 
         //Value: velocity of shooter
-
-        //Put more data points
-        shooterRPM.put(0.0,0.0);
-
-        //Furthest distance
-        //shooterRPM.put(,37.0)
+        shooterRPS.put(0.8732327907316006,24.0);        
+        shooterRPS.put(1.1529219342235464,26.0);
+        shooterRPS.put(1.8059915426872029,32.0);
+        shooterRPS.put(2.5236079021737163,35.0);
+        shooterRPS.put(4.226945331446267,40.0);
+        
 
         hoodAngle = new InterpolatingDoubleTreeMap();
-
         //Key: distance
         //Value: hood angle
-
-        //Put more data points
-        hoodAngle.put(0.0,0.0);
-        
-        /*notes form 2/17
-        From Outpost:
-           Hood: 8.3916015625
-           Shooter: 80%
-        */
+        hoodAngle.put(0.8732327907316006,-0.06005859375);
+        hoodAngle.put(1.1529219342235464,2.23974609375);
+        hoodAngle.put(1.8059915426872029,5.30224609375);
+        hoodAngle.put(2.5236079021737163,6.87060546875);
+        hoodAngle.put(4.226945331446267,3.01318359375);
     }
 
     public void initialize()
     {          
+
     }
 
     public void execute()
     {
-        double distance;
-        int crtTargetID = 0;
-
-        
-        RawFiducial[] currentFiducials = LIMELIGHT.getFiducialData(); //this is the raw data from the limelight
-        List<Integer> alCurrentTargetsIDs = new ArrayList<>(); //sets up list of IDs for the field
-
-        for (RawFiducial fiducial : currentFiducials) {//moves raw fiducial ids to target ids
-
-            alCurrentTargetsIDs.add(fiducial.id);
-        }
-
-        //groups tags & picks a tag
-        if (alCurrentTargetsIDs.contains(5) && alCurrentTargetsIDs.contains(8) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
-            crtTargetID = 9;
-        }
-        else if (alCurrentTargetsIDs.contains(2) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11)){
-            crtTargetID = 11;
-        }
-        else if (alCurrentTargetsIDs.contains(8) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
-            crtTargetID = 9;
-        }
-        else if (alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11) && alCurrentTargetsIDs.contains(2)){
-            crtTargetID = 11;
-        }
-        else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11)){
-            crtTargetID = 10;
-        }
-        else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
-            crtTargetID = 10;
-        }
-        else if (alCurrentTargetsIDs.contains(11) && alCurrentTargetsIDs.contains(2)){
-            crtTargetID = 11;
-        }
-        else if (alCurrentTargetsIDs.contains(10)){
-            crtTargetID = 10;
-        }
-        
-        RawFiducial[] crtFiducials = LIMELIGHT.getFiducialData();
-
-      //moves raw fiducial to current target ids, takes only tx of the current target id    
-            for (RawFiducial fiducial : crtFiducials) {
-
-                if (fiducial.id == crtTargetID){
-                    //distToRobot = fiducial.distToRobot; // X offset (no crosshair)
-                }
-            }
-        //will keep running until finished
-
-        //runs "isFinished" function to say how it is done
-        isFinished();
-    }
-
-
-    //sets boolean for its done to stop the comand
-    public boolean isFinished()
-    {
-      return true;
+        SmartDashboard.putNumber("Predicted Hood angle",hoodAngle.get(LIMELIGHT.getDistToNearestTag()));
+        SmartDashboard.putNumber("Predicted Shooter RPS",shooterRPS.get(LIMELIGHT.getDistToNearestTag()));
+   
+        /*//will keep running until finished
+        HOOD.customPosition(hoodAngle.get(LIMELIGHT.getDistToNearestTag()));
+        SHOOTER.PIDrunMotors(shooterRPS.get(LIMELIGHT.getDistToNearestTag()));*/
     }
 }
