@@ -93,8 +93,8 @@ public class RobotContainer {
             "Start Shoot", 
             Commands.parallel(
                 //note: speed needed directly in front of the tower
-                //m_Shooter.setSpeed(42),
-                Commands.waitSeconds(0.5)
+                m_Shooter.PIDrunMotors(32),
+                Commands.waitSeconds(1)
                 .andThen(
                     Commands.parallel(
                         m_Feeder.setSpeed(65),
@@ -185,7 +185,7 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         // Controls
-        joystick.start().whileTrue(new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate));
+        //joystick.start().whileTrue(new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate));
 
 
         //Test intake (change to left trigger)
@@ -264,7 +264,7 @@ public class RobotContainer {
             Commands.parallel(
                 //note: speed needed directly in front of the tower
                 //m_Shooter.setSpeed(46), //
-                m_Shooter.PIDrunMotors(37),
+                m_Shooter.PIDrunMotors(32), //37 is max
                 Commands.waitSeconds(1)
                 .andThen(
                     Commands.parallel(

@@ -19,7 +19,7 @@ public class Intake extends SubsystemBase {
   private TalonFX intakeMotor;
 
   //max extenstion, min extension, other number...
-  private final double[] setpoints = {0.45970703125,-16.701171875};
+  private final double[] setpoints = {16.44873046875,-1.2001953125};
 
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
 
@@ -33,6 +33,7 @@ public class Intake extends SubsystemBase {
         //setups the PID value for the intake
         intakeConfigs.Slot0.kP = Constants.IntakeConstants.intake_P;
         intakeConfigs.Slot0.kD = Constants.IntakeConstants.intake_D; 
+  
 
         //Setups current limits
         intakeConfigs.CurrentLimits.withStatorCurrentLimit(60);
