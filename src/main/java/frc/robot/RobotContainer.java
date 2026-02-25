@@ -151,9 +151,9 @@ public class RobotContainer {
             m_Feeder.setSpeed(0)
         );
 
-        /*m_Hood.setDefaultCommand(
+        m_Hood.setDefaultCommand(
             m_Hood.toSetpoint(0)
-        );*/
+        );
 
         m_Indexer.setDefaultCommand(
             m_Indexer.setSpeed(0)
@@ -298,14 +298,18 @@ public class RobotContainer {
         );*/
         joystick.rightBumper().whileTrue(
             Commands.parallel(
-                new AdjustShooter(m_Hood,m_Shooter,m_Limelight),
+                //new AdjustShooter(m_Hood,m_Shooter,m_Limelight),
+                Commands.parallel(
+                m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()),
+                m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
+                ),
                 Commands.waitSeconds(1)
                 .andThen(
                     Commands.parallel(
                         m_Feeder.setSpeed(65), //
                         m_Indexer.setSpeed(65)
                     )
-                    /*.andThen(m_Intake.run(
+                    /* .andThen(m_Intake.run(
                             () -> {m_Intake.set(70);}
                         ).until(m_Intake.getPosition > -16.701171875 + 1 )
                     )
@@ -314,6 +318,11 @@ public class RobotContainer {
             )
         );
 
+        /*joystick.rightBumper().whileTrue(
+           m_Hood.run(
+            () -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());}
+           )
+        );*/
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 

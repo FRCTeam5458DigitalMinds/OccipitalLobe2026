@@ -113,6 +113,15 @@ public class Limelight extends SubsystemBase{
         else if (alCurrentTargetsIDs.contains(10)){
             crtTargetID = 10;
         }
+        else if (alCurrentTargetsIDs.size() == 1){
+            crtTargetID = alCurrentTargetsIDs.get(0);
+        }
+
+        else{
+            distance = 2.2;  
+            //Take first item of list
+        }
+    
         
         RawFiducial[] crtFiducials = getFiducialData();
 
@@ -124,6 +133,7 @@ public class Limelight extends SubsystemBase{
                }
          }
       SmartDashboard.putNumber("Dist to Robot", distance - halfofBumper);
+      
       return distance - halfofBumper;
    }
    

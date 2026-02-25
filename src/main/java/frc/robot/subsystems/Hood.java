@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -18,8 +19,11 @@ public class Hood extends SubsystemBase {
 
   TalonFX hoodMotor;
   //min, max, (later numbers)
+  private final double difference = 0;
   private final double[] setpoints = {-0.05712890625, 10.63232421875};
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
+    InterpolatingDoubleTreeMap hoodAngle;
+
 
   public Hood() {
         hoodMotor = new TalonFX(Constants.HoodConstants.hoodMotor);
@@ -34,6 +38,15 @@ public class Hood extends SubsystemBase {
         hoodConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
 
         hoodMotor.getConfigurator().apply(hoodConfigs);
+
+        hoodAngle = new InterpolatingDoubleTreeMap();
+        //Key: distance
+        //Value: hood angle
+        hoodAngle.put(0.8732327907316006,-0.06005859375);
+        hoodAngle.put(1.1529219342235464,2.23974609375);
+        hoodAngle.put(1.8059915426872029,5.30224609375);
+        hoodAngle.put(2.5236079021737163,6.87060546875);
+        hoodAngle.put(4.226945331446267,3.01318359375);
     }
 
 
@@ -50,7 +63,16 @@ public class Hood extends SubsystemBase {
             () -> {hoodMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(0));}
         );
     }
+    public Command toTreeSetpoint(double distance){
+        return runOnce(
+            () -> {goToPostion(distance);}
 
+        );
+    }
+    public void goToPostion(double distance){
+        hoodMotor.setControl(m_request.withPosition(hoodAngle.get(distance)).withSlot(0));
+        SmartDashboard.putNumber("Predicted Hood angle", hoodAngle.get(distance));
+    }
 
     //testing purposes only
     public void customPosition(double setPoint)

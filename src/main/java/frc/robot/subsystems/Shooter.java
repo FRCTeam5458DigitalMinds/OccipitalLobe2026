@@ -21,6 +21,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 
 
@@ -36,6 +37,9 @@ public class Shooter extends SubsystemBase {
 
     //Calculates the max Revolutions Per Second
     private final double maxRPM = 5500;
+
+    InterpolatingDoubleTreeMap shooterRPS;
+
     /*Notes:
     10%: 550
     20%  1100
@@ -86,6 +90,16 @@ public class Shooter extends SubsystemBase {
         upperFlyMotor.getConfigurator().apply(globalConfigs);
 
         upperFlyMotor.setControl(new Follower(lowerFlyMotor.getDeviceID(), MotorAlignmentValue.Opposed));
+
+        shooterRPS = new InterpolatingDoubleTreeMap();
+        //Key: distance 
+        //Value: velocity of shooter
+        shooterRPS.put(0.8732327907316006,24.0);        
+        shooterRPS.put(1.1529219342235464,26.0);
+        shooterRPS.put(1.8059915426872029,32.0);
+        shooterRPS.put(2.5236079021737163,35.0);
+        shooterRPS.put(4.226945331446267,40.0);
+        
     }
 
   
@@ -128,6 +142,14 @@ public class Shooter extends SubsystemBase {
       return run(
           () -> {
             lowerFlyMotor.set(0);
+          }
+      );
+    }
+
+    public Command PIDtreeRunMotors(double distance){
+      return run(
+          () -> {
+            setTargetRPM(shooterRPS.get(distance));
           }
       );
     }
