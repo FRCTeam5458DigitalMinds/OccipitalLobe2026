@@ -63,11 +63,11 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        /*m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().schedule(m_autonomousCommand);
-        }*/
+        }
         NetworkTableInstance.getDefault().getTable(dmllName).getEntry("throttle_set").setNumber(0);
 
     }
@@ -108,7 +108,4 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testExit() {}
-
-    @Override
-    public void simulationPeriodic() {}
 }

@@ -92,16 +92,22 @@ public class RobotContainer {
         NamedCommands.registerCommand(
             "Start Shoot", 
             Commands.parallel(
-                //note: speed needed directly in front of the tower
-                m_Shooter.PIDrunMotors(32),
+                //new AdjustShooter(m_Hood,m_Shooter,m_Limelight),
+                Commands.parallel(
+                m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()),
+                m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
+                ),
                 Commands.waitSeconds(1)
                 .andThen(
                     Commands.parallel(
-                        m_Feeder.setSpeed(65),
+                        m_Feeder.setSpeed(65), //
                         m_Indexer.setSpeed(65)
                     )
+                    /*  .andThen(m_Intake.oscillateIntake(
+                        ).repeatedly().until(m_Intake::atMax)
+                    )*/
                 )
-            )         
+            )     
         );
 
         NamedCommands.registerCommand(
@@ -109,7 +115,7 @@ public class RobotContainer {
             m_Feeder.setSpeed(0)
             .andThen(m_Indexer.setSpeed(0))
             .andThen(m_Shooter.stopMotors())
-            //.andThen(m_Hood.toSetpoint(0))
+            .andThen(m_Hood.toSetpoint(0))
         );
 
         //Other commands
@@ -151,9 +157,9 @@ public class RobotContainer {
             m_Feeder.setSpeed(0)
         );
 
-        m_Hood.setDefaultCommand(
+        /*m_Hood.setDefaultCommand(
             m_Hood.toSetpoint(0)
-        );
+        );*/
 
         m_Indexer.setDefaultCommand(
             m_Indexer.setSpeed(0)
@@ -170,6 +176,9 @@ public class RobotContainer {
         m_Shooter.setDefaultCommand(
             m_Shooter.stopMotors()
             //m_Shooter.PIDstopMotors()
+        );
+        m_Intake.setDefaultCommand(
+            m_Intake.runOnce(() -> m_Intake.getPosition())
         );
 
 
@@ -207,9 +216,9 @@ public class RobotContainer {
 
 
         //Get position of intake encoder at position
-        /*joystick.x().whileTrue(
+        joystick.x().whileTrue(
             m_Intake.runOnce(() -> m_Intake.getPosition())
-        );*/
+        );
 
 
         //Test hood
@@ -260,20 +269,15 @@ public class RobotContainer {
         );*/
 
         //Runs Shooter, waits, then runs the Feeder and Indexer
-        joystick.rightTrigger(0.05).whileTrue(
+        joystick.rightBumper().whileTrue(
             Commands.parallel(
-                m_Shooter.PIDrunMotors(35),
+                m_Shooter.PIDrunMotors(34),
                 Commands.waitSeconds(1)
                 .andThen(
                     Commands.parallel(
                         m_Feeder.setSpeed(65), //
                         m_Indexer.setSpeed(65)
                     )
-                    /*.andThen(m_Intake.run(
-                            () -> {m_Intake.set(70);}
-                        ).until(m_Intake.getPosition > -16.701171875 + 1 )
-                    )
-                    //.andThen(m_LED.blink().repeatedly())*/
                 )
             )
         );
@@ -296,7 +300,7 @@ public class RobotContainer {
                 )
             )
         );*/
-        joystick.rightBumper().whileTrue(
+        joystick.rightTrigger().whileTrue(
             Commands.parallel(
                 //new AdjustShooter(m_Hood,m_Shooter,m_Limelight),
                 Commands.parallel(
@@ -309,14 +313,13 @@ public class RobotContainer {
                         m_Feeder.setSpeed(65), //
                         m_Indexer.setSpeed(65)
                     )
-                    /* .andThen(m_Intake.run(
-                            () -> {m_Intake.set(70);}
-                        ).until(m_Intake.getPosition > -16.701171875 + 1 )
-                    )
-                    //.andThen(m_LED.blink().repeatedly())*/
+                    /*  .andThen(m_Intake.oscillateIntake(
+                        ).repeatedly().until(m_Intake::atMax)
+                    )*/
                 )
             )
         );
+
 
         /*joystick.rightBumper().whileTrue(
            m_Hood.run(

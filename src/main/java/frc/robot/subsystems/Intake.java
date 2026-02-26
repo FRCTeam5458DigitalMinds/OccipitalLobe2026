@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -19,7 +21,7 @@ public class Intake extends SubsystemBase {
   private TalonFX intakeMotor;
 
   //max extenstion, min extension, other number...
-  private final double[] setpoints = {16.44873046875,-1.2001953125};
+  private final double[] setpoints = {14.00833984375,-3.140625};
 
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
 
@@ -79,4 +81,19 @@ public class Intake extends SubsystemBase {
         SmartDashboard.putNumber("Intake Position", intakeEncoder);
         return intakeEncoder;
     }
+
+    public boolean atMax(){
+          if (getPosition() < setpoints[1] + 0.001){
+              return true;
+          }
+          return false;
+    }
+  
+
+    /*public Command oscillateIntake(){
+      return run(
+      );
+    }*/
+
+
 }

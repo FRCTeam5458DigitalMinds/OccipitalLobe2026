@@ -8,7 +8,10 @@ import frc.robot.subsystems.*;
 
 public class ShootCmd extends Command {
 
-    //declare subsystems needed
+    Hood HOOD;
+    Shooter SHOOTER;
+    
+
 
     public ShootCmd(/*Add needed subsystems */) 
     {
