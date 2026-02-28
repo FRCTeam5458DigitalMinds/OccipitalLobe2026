@@ -5,16 +5,21 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class LED extends SubsystemBase{
-    private PowerDistribution sparkPDH = new PowerDistribution(1, ModuleType.kRev);
+    private PowerDistribution sparkPDH = new PowerDistribution(Constants.LEDConstants.PDH, ModuleType.kRev);
 
     public Command LEDon(){
-     return runOnce(() -> {sparkPDH.setSwitchableChannel(true);});
+     return run(() -> {sparkPDH.setSwitchableChannel(true);});
     }
   
     public Command LEDoff(){
-     return runOnce(() -> {sparkPDH.setSwitchableChannel(false);});
+     return run(() -> {sparkPDH.setSwitchableChannel(false);});
+    }
+
+    public void turnOn(){
+        sparkPDH.setSwitchableChannel(true);
     }
 
     public Command blink(){

@@ -18,20 +18,23 @@ public class AutoalignRotate extends Command {
     CommandSwerveDrivetrain DRIVETRAIN;
     SwerveRequest.RobotCentric robotDrive;
 
+    LED LED;
 
     Double maxAnglSpeed; //Max Angular Speed
 
-    public AutoalignRotate(Limelight limelight, CommandSwerveDrivetrain drivetrain, Double maxAngularSpeed) 
+    public AutoalignRotate(Limelight limelight, CommandSwerveDrivetrain drivetrain, Double maxAngularSpeed, LED led) 
     {
         this.LIMELIGHT = limelight;
         this.DRIVETRAIN = drivetrain;
         robotDrive = new SwerveRequest.RobotCentric().withDriveRequestType(DriveRequestType.OpenLoopVoltage);
         maxAnglSpeed = maxAngularSpeed;
+        this.LED = led;
 
         addRequirements(limelight);
         addRequirements(drivetrain);
-    
+        addRequirements(LED);    
     }
+
     //puts the Target ID on the Dashboard
     public void initialize()
     {   
@@ -122,13 +125,14 @@ public class AutoalignRotate extends Command {
         } while (isCentered == false); //stop when tag is centered
 
         //runs "isFinished" function to say how it is done
+        LED.LEDon();
         isFinished();
     }
 
 
     //sets boolean for its done to stop the comand
-    public boolean isFinished()
-    {
+    public boolean isFinished(){
+        
       return true;
     }
 }

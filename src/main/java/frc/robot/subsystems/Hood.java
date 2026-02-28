@@ -42,6 +42,8 @@ public class Hood extends SubsystemBase {
         hoodMotor.setPosition(-0.05712890625);
 
         hoodAngle = new InterpolatingDoubleTreeMap();
+
+        //ngl might redo
         //Key: distance
         //Value: hood angle
         hoodAngle.put(0.8732327907316006,-0.06005859375);

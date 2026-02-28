@@ -157,9 +157,9 @@ public class RobotContainer {
             m_Feeder.setSpeed(0)
         );
 
-        /*m_Hood.setDefaultCommand(
+        m_Hood.setDefaultCommand(
             m_Hood.toSetpoint(0)
-        );*/
+        );
 
         m_Indexer.setDefaultCommand(
             m_Indexer.setSpeed(0)
@@ -175,11 +175,15 @@ public class RobotContainer {
 
         m_Shooter.setDefaultCommand(
             m_Shooter.stopMotors()
-            //m_Shooter.PIDstopMotors()
         );
         m_Intake.setDefaultCommand(
             m_Intake.runOnce(() -> m_Intake.getPosition())
         );
+
+        /* 
+        m_Limelight.setDefaultCommand(
+
+        );*/
 
 
 
@@ -194,7 +198,10 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         // Controls
-        //joystick.start().whileTrue(new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate));
+        joystick.start().whileTrue(
+            new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate, m_LED)
+            .andThen(m_LED.LEDon().repeatedly())
+        );
 
 
         //Test intake (change to left trigger)
@@ -205,7 +212,6 @@ public class RobotContainer {
             )
         );
 
-
         //Testing purposes only
         joystick.povDown().whileTrue(
             m_Intake.runEnd(
@@ -213,12 +219,11 @@ public class RobotContainer {
                 () -> {m_Intake.setIntake(0);}
             )
         );
-
-
         //Get position of intake encoder at position
         joystick.x().whileTrue(
             m_Intake.runOnce(() -> m_Intake.getPosition())
         );
+
 
 
         //Test hood
@@ -262,11 +267,11 @@ public class RobotContainer {
             )
         );
 
-        /*joystick.leftBumper().whileTrue(
-            m_Intake.run(
-                () -> {m_Intake.toSetpoint(0);}
-            )
-        );*/
+        //Testing purposes
+        joystick.leftBumper().whileTrue(
+            
+           m_LED.LEDon().repeatedly()
+        );
 
         //Runs Shooter, waits, then runs the Feeder and Indexer
         joystick.rightBumper().whileTrue(
@@ -310,12 +315,18 @@ public class RobotContainer {
                 Commands.waitSeconds(1)
                 .andThen(
                     Commands.parallel(
-                        m_Feeder.setSpeed(65), //
-                        m_Indexer.setSpeed(65)
+                        Commands.parallel(
+                            m_Feeder.setSpeed(65),
+                            m_Indexer.setSpeed(65)
+                        )
+                        ,
+                        Commands.repeatingSequence(
+                            m_Intake.retractIntake()
+                            .andThen(Commands.waitSeconds(0.25))
+                            .andThen(m_Intake.extendIntake())
+                            .andThen(Commands.waitSeconds(0.25))
+                        )
                     )
-                    /*  .andThen(m_Intake.oscillateIntake(
-                        ).repeatedly().until(m_Intake::atMax)
-                    )*/
                 )
             )
         );

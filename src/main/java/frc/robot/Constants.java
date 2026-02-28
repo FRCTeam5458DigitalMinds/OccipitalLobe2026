@@ -44,7 +44,7 @@ public final class Constants {
 
   public static class LimelightConstants {
     public static final String ll_Name = "limelight-digital";
-    public static int pipeline = 1;    /// Night in shope (1), day in shop (0), At citrus (2)...
+    public static int pipeline = 0;    /// Night in shope (1), day in shop (0), At citrus (2)...
   }
 
   public static class ShooterConstants {
@@ -64,5 +64,9 @@ public final class Constants {
   
   public static class FeederConstants {
     public static final int feeder = 22;
+  }
+
+  public static class LEDConstants{
+    public static final int PDH = 1;
   }
 }

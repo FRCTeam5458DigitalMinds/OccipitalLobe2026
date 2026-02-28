@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
-  /** Creates a new ExampleSubsystem. */
   
   private TalonFX intakeMotor;
 
@@ -25,7 +24,6 @@ public class Intake extends SubsystemBase {
 
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
 
-  
   public Intake() {
 
     //Set up motors
@@ -35,7 +33,6 @@ public class Intake extends SubsystemBase {
         //setups the PID value for the intake
         intakeConfigs.Slot0.kP = Constants.IntakeConstants.intake_P;
         intakeConfigs.Slot0.kD = Constants.IntakeConstants.intake_D; 
-  
 
         //Setups current limits
         intakeConfigs.CurrentLimits.withStatorCurrentLimit(60);
@@ -43,16 +40,9 @@ public class Intake extends SubsystemBase {
 
         intakeMotor.getConfigurator().apply(intakeConfigs);
 
+        intakeMotor.setPosition(-3.140625);
 
   }
-
-  /*public Command intakeCmd(){
-    return runOnce(null)
-
-  }
-  public Command retractCmd(){
-  
-  }*/
 
     //Negative means extends
     public void setIntake(double OutputPercent)
@@ -82,18 +72,23 @@ public class Intake extends SubsystemBase {
         return intakeEncoder;
     }
 
+
+    public Command retractIntake(){
+      return runOnce(
+        () -> {customPosition(getPosition()-5);}
+      );
+    }
+    public Command extendIntake(){
+      return runOnce(
+        () -> {customPosition(getPosition()+5);}
+      );
+    }
+
+    /*Returns true if extended to max
     public boolean atMax(){
           if (getPosition() < setpoints[1] + 0.001){
               return true;
           }
           return false;
-    }
-  
-
-    /*public Command oscillateIntake(){
-      return run(
-      );
-    }*/
-
-
+    }*/ 
 }
