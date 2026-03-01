@@ -66,7 +66,7 @@ public class Hood extends SubsystemBase {
     //Go to certain position based on setpoint index
     public Command toSetpoint(int setpointIndex)
     {
-        return runOnce(
+        return run(
             () -> {hoodMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(0));}
         );
     }

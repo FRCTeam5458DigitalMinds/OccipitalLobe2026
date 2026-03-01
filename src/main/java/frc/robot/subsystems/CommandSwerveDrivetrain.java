@@ -144,6 +144,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        pigeon.reset();
         configureAutoBuilder();
         //Puts field onto Elastic
         SmartDashboard.putData("Field", m_field);
@@ -426,5 +427,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void resetPoseEstimator()
     {
         m_poseEstimator.resetPose(getState().Pose);
+    }
+
+    public boolean facingDriver(){
+        double yaw = Math.abs(pigeon.getYaw().getValueAsDouble()%360);
+        if (yaw > 320 || yaw < 40){
+            return true;
+        }
+        return false;
+    }
+    public void yawNum(){
+        SmartDashboard.putNumber("YAW", Math.abs(pigeon.getYaw().getValueAsDouble()%360));
     }
 }

@@ -3,6 +3,7 @@
   "robotLength": 0.87,
   "holonomicMode": true,
   "pathFolders": [
+    "From trench",
     "Starting points"
   ],
   "autoFolders": [],
@@ -30,5 +31,8 @@
   "brModuleY": -0.273,
   "bumperOffsetX": 0.0,
   "bumperOffsetY": 0.0,
-  "robotFeatures": []
+  "robotFeatures": [
+    "{\"name\":\"Rectangle\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":-0.3,\"y\":0.0},\"size\":{\"width\":0.87,\"length\":0.2},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":false}}",
+    "{\"name\":\"Circle\",\"type\":\"circle\",\"data\":{\"center\":{\"x\":0.3,\"y\":0.3},\"radius\":0.13,\"strokeWidth\":0.02,\"filled\":false}}"
+  ]
 }

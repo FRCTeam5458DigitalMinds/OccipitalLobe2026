@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
@@ -63,79 +64,87 @@ public class RobotContainer {
     
     private final SendableChooser<Command> autoChooser2;
 
-    private final SendableChooser<Integer> limelightPipelineChooser;
-
     private final int redConst = -1;
     private int sideConst = -1;
 
 
     public RobotContainer() {
-        //Autos
         //Pathplanner Auto Commands
-
-        //Climber
-        //NamedCommands.registerCommand("Deploy Hood", m_Climber.run(()-> {}));
-
-        //Hood
-        //NamedCommands.registerCommand("Deploy Hood", m_Hood.run(()-> {m_Hood.toSetpoint(1);}));
-        //NamedCommands.registerCommand("Retract Hood", m_Hood.run(()-> {m_Hood.toSetpoint(0);}));
-
-        //Indexer
-        //NamedCommands.registerCommand("Deploy Hood", m_Hood.run(()-> {}));
-
-
-        //Intake
-        //NamedCommands.registerCommand("Deploy Intake", m_Intake.run(() -> {m_Intake.toSetpoint(1);}));
-        //NamedCommands.registerCommand("Retract Intake", m_Intake.run(() -> {m_Intake.toSetpoint(0);}));
 
         //Shooter 
         NamedCommands.registerCommand(
-            "Start Shoot", 
-            Commands.parallel(
-                //new AdjustShooter(m_Hood,m_Shooter,m_Limelight),
-                Commands.parallel(
-                m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()),
-                m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
-                ),
-                Commands.waitSeconds(1)
-                .andThen(
-                    Commands.parallel(
-                        m_Feeder.setSpeed(65), //
-                        m_Indexer.setSpeed(65)
-                    )
-                    /*  .andThen(m_Intake.oscillateIntake(
-                        ).repeatedly().until(m_Intake::atMax)
-                    )*/
-                )
-            )     
+            "Shoot", 
+            m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag())
+        );
+
+        //Hood
+        NamedCommands.registerCommand(
+            "Set Hood", 
+            m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
         );
 
         NamedCommands.registerCommand(
-            "Stop Shoot", 
+            "Retract Hood", 
+            m_Hood.run(()-> {m_Hood.toSetpoint(0);})
+        );
+
+        //Indexer
+        NamedCommands.registerCommand(
+            "Set Indexer", 
+            m_Indexer.setSpeed(65)
+        );
+
+        //Intake
+        NamedCommands.registerCommand(
+            "Deploy Intake", 
+            Commands.parallel(m_Intake.run(() -> {m_Intake.toSetpoint(1);}),
+            m_Roller.setSpeed(80)
+            )
+        );
+
+        NamedCommands.registerCommand(
+            "Retract Intake", 
+            m_Intake.run(() -> {m_Intake.toSetpoint(0);})
+        );
+
+        NamedCommands.registerCommand(
+            "Oscillate", 
+            Commands.repeatingSequence(
+                m_Intake.retractIntake()
+                .andThen(Commands.waitSeconds(0.25))
+                .andThen(m_Intake.extendIntake())
+                .andThen(Commands.waitSeconds(0.25))
+            )
+        );
+
+        //Feeder
+        NamedCommands.registerCommand(
+            "Set Feeder", m_Feeder.setSpeed(65)
+        );
+
+        //Stop everything
+        NamedCommands.registerCommand(
+            "Stop everything", 
             m_Feeder.setSpeed(0)
             .andThen(m_Indexer.setSpeed(0))
             .andThen(m_Shooter.stopMotors())
             .andThen(m_Hood.toSetpoint(0))
+            .andThen(m_Roller.setSpeed(0))
         );
 
         //Other commands
-        NamedCommands.registerCommand("Pose", drivetrain.runOnce(()-> drivetrain.resetPoseEstimator()));
-        //NamedCommands.registerCommand("Auto Rotate", new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate));
-
+        NamedCommands.registerCommand(
+            "Pose", 
+            drivetrain.runOnce(()-> drivetrain.resetPoseEstimator())
+        );
+        NamedCommands.registerCommand(
+            "Auto Rotate", 
+            new AutoalignRotate(m_Limelight, drivetrain, MaxAngularRate, m_LED)
+        );
         //Make an auto chooser on the smart dashboard
         autoChooser2 = AutoBuilder.buildAutoChooser();
         
         SmartDashboard.putData("Auto Chooser", autoChooser2); 
-
-        limelightPipelineChooser = new SendableChooser<>();
-
-        limelightPipelineChooser.setDefaultOption("Day", 0);
-        limelightPipelineChooser.addOption("Night", 1);
-        limelightPipelineChooser.addOption("Comp", 2);
-
-        SmartDashboard.putData("Pipeline Chooser", limelightPipelineChooser);
-
-        LimelightConstants.pipeline = limelightPipelineChooser.getSelected();
 
         configureBindings();
     }
@@ -156,36 +165,29 @@ public class RobotContainer {
         m_Feeder.setDefaultCommand(
             m_Feeder.setSpeed(0)
         );
-
         m_Hood.setDefaultCommand(
             m_Hood.toSetpoint(0)
+            .andThen(m_Hood.runOnce(() -> {m_Hood.getPosition();}))
         );
-
         m_Indexer.setDefaultCommand(
             m_Indexer.setSpeed(0)
         );
-
         m_LED.setDefaultCommand(
-            m_LED.LEDoff()
+            m_LED.LEDon().repeatedly().onlyWhile(m_Limelight::isCentered)
+            .andThen(m_LED.LEDoff())
         );
-
         m_Roller.setDefaultCommand(
             m_Roller.setSpeed(0)
         );
-
         m_Shooter.setDefaultCommand(
             m_Shooter.stopMotors()
         );
         m_Intake.setDefaultCommand(
             m_Intake.runOnce(() -> m_Intake.getPosition())
         );
-
-        /* 
         m_Limelight.setDefaultCommand(
-
-        );*/
-
-
+            m_Limelight.runOnce(() -> {m_Limelight.getDistToNearestTag();})
+        );
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
@@ -194,17 +196,71 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        // Reset the field-centric heading on left bumper press.
+        /* Main Commands */
+
+        // Reset the field-centric heading on back button press.
         joystick.back().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         // Controls
         joystick.start().whileTrue(
-            new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate, m_LED)
+            new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate, m_LED).until(m_Limelight::isCentered)
             .andThen(m_LED.LEDon().repeatedly())
         );
 
+        //All this to shoot btw
+        joystick.rightTrigger().whileTrue(
+            //Two parts: shooter & hood and everything else
+            Commands.parallel(
+                //Part 1
+                //Two parts: run shooter and run hood depending on where the robot is facing
+                Commands.parallel(
+                    //run shooter based on distance
+                    m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()),
+                    new ConditionalCommand(
+                        //On true, ferry mode
+                        m_Hood.toSetpoint(1),
+                        //On false, hub mode
+                        m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());}),
+                        //Conditional: check if robot is facing drivers
+                        drivetrain::facingDriver
+                    )
+                ),
+                //Part 2
+                //Add 1 Second delay of cmd group 2
+                Commands.waitSeconds(1)
+                .andThen(
+                    //Two parts: index & feeder and intake
+                    Commands.parallel(
+                         //run both feeder and indexer
+                        Commands.parallel(
+                            m_Feeder.setSpeed(65),
+                            m_Indexer.setSpeed(65)
+                        ),
+                        //Oscillate intake
+                        Commands.repeatingSequence(
+                            m_Intake.retractIntake()
+                            .andThen(Commands.waitSeconds(0.3))
+                            .andThen(m_Intake.extendIntake())
+                            .andThen(Commands.waitSeconds(0.3))
+                        )
+                    )
+                )
+            )
+        );
 
-        //Test intake (change to left trigger)
+        //Extends intake
+        joystick.leftTrigger(0.05).whileTrue(
+            Commands.parallel(
+                m_Intake.run(
+                    () -> {m_Intake.toSetpoint(0);}
+                ),
+                m_Roller.setSpeed(80)
+            )
+        );
+
+        drivetrain.registerTelemetry(logger::telemeterize); 
+        
+        //Backup intake control
         joystick.povUp().whileTrue(
             m_Intake.runEnd(
                 () -> {m_Intake.setIntake(90);}, 
@@ -212,20 +268,18 @@ public class RobotContainer {
             )
         );
 
-        //Testing purposes only
-        joystick.povDown().whileTrue(
-            m_Intake.runEnd(
-                () -> {m_Intake.setIntake(-90);}, 
-                () -> {m_Intake.setIntake(0);}
-            )
-        );
-        //Get position of intake encoder at position
+
+        /* Test section */
         joystick.x().whileTrue(
-            m_Intake.runOnce(() -> m_Intake.getPosition())
+            new ConditionalCommand(
+                        //On true, ferry mode
+                        m_Hood.toSetpoint(1),
+                        //On false, hub mode
+                        m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());}),
+                        //Conditional: check if robot is facing drivers
+                        drivetrain::facingDriver
+                    )
         );
-
-
-
         //Test hood
         joystick.a().whileTrue(
             m_Hood.runEnd(
@@ -243,12 +297,6 @@ public class RobotContainer {
             )
         );
 
-
-        //Sends the encoder value of the Hood to the dashboard 
-        joystick.b().whileTrue(
-            m_Hood.runOnce(() -> {m_Hood.getPosition();})
-        );
-
         //Run climb
         /*joystick.povUp().whileTrue(
             m_Climber.runEnd(
@@ -257,23 +305,16 @@ public class RobotContainer {
             )
         );*/
 
-        //Extends intake
-        joystick.leftTrigger(0.05).whileTrue(
-            Commands.parallel(
-                m_Intake.run(
-                    () -> {m_Intake.toSetpoint(0);}
-                ),
-                m_Roller.setSpeed(80)
-            )
-        );
-
         //Testing purposes
         joystick.leftBumper().whileTrue(
             
-           m_LED.LEDon().repeatedly()
+           drivetrain.runOnce(
+            () -> {drivetrain.yawNum();}
+           )
         );
 
-        //Runs Shooter, waits, then runs the Feeder and Indexer
+        //Testing purposes
+        //test shooter rps
         joystick.rightBumper().whileTrue(
             Commands.parallel(
                 m_Shooter.PIDrunMotors(34),
@@ -286,58 +327,6 @@ public class RobotContainer {
                 )
             )
         );
-        joystick.x().whileTrue(
-            m_Limelight.runOnce(() -> {m_Limelight.getDistToNearestTag();})
-        );
-        //Same as above but for feed mode
-        /*joystick.rightBumper().whileTrue(
-            Commands.parallel(
-                //note: speed needed directly in front of the tower
-                Commands.parallel(
-                    m_Hood.toSetpoint(1),
-                    m_Shooter.setSpeed(1100)),
-                Commands.waitSeconds(0.5)
-                .andThen(
-                    Commands.parallel(
-                        m_Feeder.setSpeed(65),
-                        m_Indexer.setSpeed(65)
-                    )
-                )
-            )
-        );*/
-        joystick.rightTrigger().whileTrue(
-            Commands.parallel(
-                //new AdjustShooter(m_Hood,m_Shooter,m_Limelight),
-                Commands.parallel(
-                m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()),
-                m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
-                ),
-                Commands.waitSeconds(1)
-                .andThen(
-                    Commands.parallel(
-                        Commands.parallel(
-                            m_Feeder.setSpeed(65),
-                            m_Indexer.setSpeed(65)
-                        )
-                        ,
-                        Commands.repeatingSequence(
-                            m_Intake.retractIntake()
-                            .andThen(Commands.waitSeconds(0.25))
-                            .andThen(m_Intake.extendIntake())
-                            .andThen(Commands.waitSeconds(0.25))
-                        )
-                    )
-                )
-            )
-        );
-
-
-        /*joystick.rightBumper().whileTrue(
-           m_Hood.run(
-            () -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());}
-           )
-        );*/
-        drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     

@@ -7,6 +7,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
@@ -26,14 +27,21 @@ public class Limelight extends SubsystemBase{
    //info from tag
    int id;
 
-   double selectedPipeline;
-
 //pose thingys
    private LimelightHelpers.PoseEstimate limelightMeasurement = new LimelightHelpers.PoseEstimate();
 
-   public Limelight(){   
-      //selectedPipeline = 
-      LimelightHelpers.setPipelineIndex(dmllName,Constants.LimelightConstants.pipeline);
+    private final SendableChooser<Integer> limelightPipelineChooser;
+
+   public Limelight(){
+        limelightPipelineChooser = new SendableChooser<>();
+
+        limelightPipelineChooser.setDefaultOption("Day", 0);
+        limelightPipelineChooser.addOption("Night", 1);
+        limelightPipelineChooser.addOption("Comp", 2);
+
+        SmartDashboard.putData("Pipeline Chooser", limelightPipelineChooser);
+        LimelightHelpers.setPipelineIndex(Constants.LimelightConstants.ll_Name,limelightPipelineChooser.getSelected());
+
    }
    //Change smartdashboard to elastic later
     // Basic targeting data
@@ -73,62 +81,55 @@ public class Limelight extends SubsystemBase{
       SmartDashboard.putNumber("LL-ID", dTarget);
       return dTarget;
    }
-
-   public Double getDistToNearestTag(){
-
-      double distance = 0;
-      int crtTargetID = 0;
-      double halfofBumper = 0.87/2;
-      
-      RawFiducial[] currentFiducials = getFiducialData(); //this is the raw data from the limelight
+   public int priorityTag(){
+        RawFiducial[] currentFiducials = getFiducialData(); //this is the raw data from the limelight
         List<Integer> alCurrentTargetsIDs = new ArrayList<>(); //sets up list of IDs for the field
 
         for (RawFiducial fiducial : currentFiducials) {//moves raw fiducial ids to target ids
-
             alCurrentTargetsIDs.add(fiducial.id);
         }
 
         //groups tags & picks a tag
         if (alCurrentTargetsIDs.contains(5) && alCurrentTargetsIDs.contains(8) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
-            crtTargetID = 9;
+            return 9;
         }
         else if (alCurrentTargetsIDs.contains(2) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11)){
-            crtTargetID = 11;
+            return 11;
         }
         else if (alCurrentTargetsIDs.contains(8) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
-            crtTargetID = 9;
+            return 9;
         }
         else if (alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11) && alCurrentTargetsIDs.contains(2)){
-            crtTargetID = 11;
+            return 11;
         }
         else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11)){
-            crtTargetID = 10;
+            return 10;
         }
         else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
-            crtTargetID = 10;
+            return 10;
         }
         else if (alCurrentTargetsIDs.contains(11) && alCurrentTargetsIDs.contains(2)){
-            crtTargetID = 11;
+            return 11;
         }
         else if (alCurrentTargetsIDs.contains(10)){
-            crtTargetID = 10;
+            return 10;
         }
-        else if (alCurrentTargetsIDs.size() == 1){
-            crtTargetID = alCurrentTargetsIDs.get(0);
-        }
-
         else{
-            distance = 2.2;  
-            //Take first item of list
+            return 0;
         }
-    
+   }
+
+   public Double getDistToNearestTag(){
+
+      double distance = 2.2;
+      double halfofBumper = 0.87/2;   
         
-        RawFiducial[] crtFiducials = getFiducialData();
+    RawFiducial[] crtFiducials = getFiducialData();
 
       //moves raw fiducial to current target ids, takes only tx of the current target id    
          for (RawFiducial fiducial : crtFiducials) {
 
-                if (fiducial.id == crtTargetID){
+                if (fiducial.id == priorityTag()){
                     distance = fiducial.distToRobot; // X offset (no crosshair)
                }
          }
@@ -137,7 +138,7 @@ public class Limelight extends SubsystemBase{
       return distance - halfofBumper;
    }
    
-  public double limelight_aim_proportional(Double robotMaxAngularSpeed){    
+  public double limelight_aim_proportional(Double robotMaxAngularSpeed, double currentTX){    
     // kP (constant of proportionality)
     // this is a hand-tuned number that determines the aggressiveness of our proportional control loop
     // if it is too high, the robot will oscillate around.
@@ -147,7 +148,7 @@ public class Limelight extends SubsystemBase{
 
     // tx ranges from (-hfov/2) to (hfov/2) in degrees. If your target is on the rightmost edge of 
     // your limelight 3 feed, tx should return roughly 31 degrees.
-    double targetingAngularVelocity = getTX() * AutoalignkP;
+    double targetingAngularVelocity = currentTX * AutoalignkP;
 
     // convert to radians per second for our drive method
     targetingAngularVelocity *= robotMaxAngularSpeed;
@@ -177,6 +178,25 @@ public class Limelight extends SubsystemBase{
     RawFiducial[] fiducials = LimelightHelpers.getRawFiducials(dmllName);
 
     return fiducials;
+  }
+  
+  public boolean isCentered(){
+    double txnc = 99;
+    RawFiducial[] crtFiducials = getFiducialData();
+
+      //moves raw fiducial to current target ids, takes only tx of the current target id    
+    for (RawFiducial fiducial : crtFiducials) {
+
+        if (fiducial.id == priorityTag()){
+            txnc = fiducial.txnc; // X offset (no crosshair)
+        }
+    }
+
+    if (-14 < txnc && txnc < 9){ //-23 & -30
+        return true;
+        
+    }
+    return false;
   }
 }
 

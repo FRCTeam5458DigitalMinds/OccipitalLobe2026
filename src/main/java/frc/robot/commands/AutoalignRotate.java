@@ -103,7 +103,8 @@ public class AutoalignRotate extends Command {
             if (crtTargetID != 0){
 
                     //Runs function to get turn speed
-                    double turnSpeed = LIMELIGHT.limelight_aim_proportional(maxAnglSpeed);
+                    double turnSpeed = LIMELIGHT.limelight_aim_proportional(maxAnglSpeed,currentTXNC);
+
 
                     SmartDashboard.putNumber("TXNC", currentTXNC);
 
@@ -111,7 +112,7 @@ public class AutoalignRotate extends Command {
                     DRIVETRAIN.setControl(robotDrive.withRotationalRate(turnSpeed));
 
                     //If crosshair is between these horizontal values , stop
-                    if (-5 < LIMELIGHT.getTX() && LIMELIGHT.getTX() < 9){ //-23 & -30
+                    if (-14 < currentTXNC && currentTXNC < 9){ //-23 & -30
                         isCentered = true;
                     }
 
@@ -125,14 +126,12 @@ public class AutoalignRotate extends Command {
         } while (isCentered == false); //stop when tag is centered
 
         //runs "isFinished" function to say how it is done
-        LED.LEDon();
         isFinished();
     }
 
 
     //sets boolean for its done to stop the comand
     public boolean isFinished(){
-        
       return true;
     }
 }

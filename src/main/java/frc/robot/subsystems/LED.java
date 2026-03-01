@@ -11,11 +11,16 @@ public class LED extends SubsystemBase{
     private PowerDistribution sparkPDH = new PowerDistribution(Constants.LEDConstants.PDH, ModuleType.kRev);
 
     public Command LEDon(){
-     return run(() -> {sparkPDH.setSwitchableChannel(true);});
+     return run(() -> {turnOn();});
     }
   
     public Command LEDoff(){
-     return run(() -> {sparkPDH.setSwitchableChannel(false);});
+     return run(() -> {turnOff();});
+    }
+
+    public void turnOff(){
+        sparkPDH.setSwitchableChannel(false);
+
     }
 
     public void turnOn(){
