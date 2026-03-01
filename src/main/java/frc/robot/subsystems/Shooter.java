@@ -4,9 +4,13 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Volt;
+
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
@@ -15,10 +19,13 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants;
 import frc.robot.Constants.ShooterConstants;
+import edu.wpi.first.units.VoltageUnit;
+
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
@@ -52,12 +59,12 @@ public class Shooter extends SubsystemBase {
     90%  4950
     100% 5500
     */
-    /*private final SimpleMotorFeedforward m_shooterFeedforward =
-      new SimpleMotorFeedforward(
-          ShooterConstants.kSVolts, ShooterConstants.kVVoltSecondsPerRotation);
 
-    private final PIDController m_shooterFeedback = new PIDController(Constants.ShooterConstants.p_Value, 0.0, 0.0);*/
+    private final SysIdRoutine m_sysIdRoutine;
+    private final VoltageOut m_voltReq = new VoltageOut(0.0);
 
+
+    SysIdRoutine routine;
     public Shooter() {
 
         //m_shooterFeedback.setTolerance(Constants.ShooterConstants.kShooterToleranceRPS);
@@ -73,8 +80,6 @@ public class Shooter extends SubsystemBase {
         globalConfigs.Slot0.kS = Constants.ShooterConstants.s_Value;
         globalConfigs.Slot0.kV = Constants.ShooterConstants.v_Value; // A velocity target of 1 rps results in 0.12 V output
         globalConfigs.Slot0.kP = Constants.ShooterConstants.p_Value;
-        globalConfigs.Slot0.kI = Constants.ShooterConstants.i_Value;
-        globalConfigs.Slot0.kD = Constants.ShooterConstants.d_Value;
 
         globalConfigs.Voltage.withPeakForwardVoltage(8)
         .withPeakReverseVoltage(-8);
@@ -99,6 +104,22 @@ public class Shooter extends SubsystemBase {
         shooterRPS.put(1.8059915426872029,32.0);
         shooterRPS.put(2.5236079021737163,35.0);
         shooterRPS.put(4.226945331446267,40.0);
+
+        m_sysIdRoutine =
+          new SysIdRoutine(
+              new SysIdRoutine.Config(
+         null,        // Use default ramp rate (1 V/s)
+                  Volt.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
+          null,        // Use default timeout (10 s)
+                      // Log state with Phoenix SignalLogger class
+         (state) -> SignalLogger.writeString("state", state.toString())
+        ),
+          new SysIdRoutine.Mechanism(
+          (volts) -> lowerFlyMotor.setControl(m_voltReq.withOutput(volts.in(Volt))),
+          null,
+          this
+        )
+      );
         
     }
 
@@ -157,6 +178,10 @@ public class Shooter extends SubsystemBase {
     public void setTargetRPM(double RPS){
       SmartDashboard.putNumber("RPS", lowerFlyMotor.getVelocity().getValueAsDouble());
       lowerFlyMotor.setControl(m_request.withVelocity(RPS));
+    }
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+   return m_sysIdRoutine.quasistatic(direction);
     }
 
 }

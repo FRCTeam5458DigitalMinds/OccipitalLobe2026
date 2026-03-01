@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.TunerConstants;
 
 import frc.robot.subsystems.*;
@@ -268,18 +270,6 @@ public class RobotContainer {
             )
         );
 
-
-        /* Test section */
-        joystick.x().whileTrue(
-            new ConditionalCommand(
-                        //On true, ferry mode
-                        m_Hood.toSetpoint(1),
-                        //On false, hub mode
-                        m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());}),
-                        //Conditional: check if robot is facing drivers
-                        drivetrain::facingDriver
-                    )
-        );
         //Test hood
         joystick.a().whileTrue(
             m_Hood.runEnd(
@@ -305,12 +295,22 @@ public class RobotContainer {
             )
         );*/
 
+        /* Joystick B = Quasistatic forward
+        Joystick X = Quasistatic reverse*/
+
+        joystick.b().whileTrue(
+            m_Shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+        );
+        joystick.x().whileTrue(
+            m_Shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+        );
+
         //Testing purposes
-        joystick.leftBumper().whileTrue(
-            
-           drivetrain.runOnce(
-            () -> {drivetrain.yawNum();}
-           )
+        joystick.povLeft().onTrue(
+            Commands.runOnce(SignalLogger::start)
+        );
+        joystick.povRight().onTrue(
+            Commands.runOnce(SignalLogger::stop)
         );
 
         //Testing purposes
