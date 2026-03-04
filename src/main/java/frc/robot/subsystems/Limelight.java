@@ -40,7 +40,7 @@ public class Limelight extends SubsystemBase{
         limelightPipelineChooser.addOption("Comp", 2);
 
         SmartDashboard.putData("Pipeline Chooser", limelightPipelineChooser);
-        LimelightHelpers.setPipelineIndex(Constants.LimelightConstants.ll_Name,limelightPipelineChooser.getSelected());
+        LimelightHelpers.setPipelineIndex(Constants.LimelightConstants.ll_Name,Constants.LimelightConstants.pipeline);
 
    }
    //Change smartdashboard to elastic later

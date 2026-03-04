@@ -359,7 +359,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         boolean doRejectUpdate = false;
 
         //sets up robot orientation based on tags
-        LimelightHelpers.SetRobotOrientation(Constants.LimelightConstants.ll_Name, m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        //LimelightHelpers.SetRobotOrientation(Constants.LimelightConstants.ll_Name, m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
         
         //sets up megatag 2 
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.LimelightConstants.ll_Name);
@@ -404,9 +404,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 ),
                 new PPHolonomicDriveController(
                     // PID constants for translation
-                    new PIDConstants(5, 0, 0), //Change P when testing autos
+                    new PIDConstants(3, 0, 0), //Change P when testing autos
                     // PID constants for rotation
-                    new PIDConstants(5, 0, 0)
+                    new PIDConstants(3, 0, 0)
                 ),
                 config,
                 // Assume the path needs to be flipped for Red vs Blue, this is normally the case

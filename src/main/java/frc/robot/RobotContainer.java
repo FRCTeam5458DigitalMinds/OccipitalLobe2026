@@ -72,9 +72,39 @@ public class RobotContainer {
 
     public RobotContainer() {
         //Pathplanner Auto Commands
+        NamedCommands.registerCommand(
+            "Main Shoot", 
+            Commands.parallel(
+                //Part 1
+                //Two parts: run shooter and run hood depending on where the robot is facing
+                Commands.parallel(
+                    //run shooter based on distance
+                    m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()),
+                    new ConditionalCommand(
+                        //On true, ferry mode
+                        m_Hood.toSetpoint(1),
+                        //On false, hub mode
+                        m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());}),
+                        //Conditional: check if robot is facing drivers
+                        drivetrain::facingDriver
+                    )
+                ),
+                //Part 2
+                //Add 1 Second delay of cmd group 2
+                Commands.waitSeconds(1)
+                .andThen(
+                    //Two parts: index & feeder
+                    //run both feeder and indexer
+                    Commands.parallel(
+                        m_Feeder.setSpeed(65),
+                        m_Indexer.setSpeed(65)
+                    )
+                )
+            )
+        );
 
         //Shooter 
-        NamedCommands.registerCommand(
+        /*NamedCommands.registerCommand(
             "Shoot", 
             m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag())
         );
@@ -82,12 +112,12 @@ public class RobotContainer {
         //Hood
         NamedCommands.registerCommand(
             "Set Hood", 
-            m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
+            m_Hood.runOnce(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
         );
 
         NamedCommands.registerCommand(
             "Retract Hood", 
-            m_Hood.run(()-> {m_Hood.toSetpoint(0);})
+            m_Hood.runOnce(()-> {m_Hood.toSetpoint(0);})
         );
 
         //Indexer
@@ -95,26 +125,27 @@ public class RobotContainer {
             "Set Indexer", 
             m_Indexer.setSpeed(65)
         );
-
+        */
         //Intake
         NamedCommands.registerCommand(
             "Deploy Intake", 
-            Commands.parallel(m_Intake.run(() -> {m_Intake.toSetpoint(1);}),
-            m_Roller.setSpeed(80)
+            Commands.parallel(
+                m_Intake.runOnce(() -> {m_Intake.toSetpoint(1);}),
+                m_Roller.setSpeed(80)
             )
         );
 
         NamedCommands.registerCommand(
             "Retract Intake", 
-            m_Intake.run(() -> {m_Intake.toSetpoint(0);})
+            m_Intake.runOnce(() -> {m_Intake.toSetpoint(0);})
         );
 
         NamedCommands.registerCommand(
             "Oscillate", 
             Commands.repeatingSequence(
-                m_Intake.retractIntake()
+                m_Intake.extendIntake()
                 .andThen(Commands.waitSeconds(0.25))
-                .andThen(m_Intake.extendIntake())
+                .andThen(m_Intake.retractIntake())
                 .andThen(Commands.waitSeconds(0.25))
             )
         );
@@ -127,11 +158,7 @@ public class RobotContainer {
         //Stop everything
         NamedCommands.registerCommand(
             "Stop everything", 
-            m_Feeder.setSpeed(0)
-            .andThen(m_Indexer.setSpeed(0))
-            .andThen(m_Shooter.stopMotors())
-            .andThen(m_Hood.toSetpoint(0))
-            .andThen(m_Roller.setSpeed(0))
+            new autoStop(m_Feeder,m_Indexer,m_Shooter,m_Hood,m_Roller, m_Intake)
         );
 
         //Other commands

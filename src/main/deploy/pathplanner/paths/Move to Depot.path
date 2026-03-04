@@ -3,45 +3,34 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.52151212553495,
-        "y": 4.067346647646221
+        "x": 3.560328102710413,
+        "y": 6.072838801711842
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.410560988725777,
-        "y": 4.397707938080052
+        "x": 2.5655071356842125,
+        "y": 6.145095856489893
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Top Depot"
     },
     {
       "anchor": {
-        "x": 2.020627674750356,
-        "y": 4.067346647646221
+        "x": 1.1925534950071324,
+        "y": 6.072838801711842
       },
       "prevControl": {
-        "x": 2.2442535049884813,
-        "y": 3.9555813218501163
+        "x": 1.5360855183021118,
+        "y": 6.0746049801128645
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Depot"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
-  "pointTowardsZones": [
-    {
-      "fieldPosition": {
-        "x": 4.634,
-        "y": 4.067
-      },
-      "rotationOffset": 0.0,
-      "minWaypointRelativePos": 0.25,
-      "maxWaypointRelativePos": 0.75,
-      "name": "Hub"
-    }
-  ],
+  "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 0.5,
