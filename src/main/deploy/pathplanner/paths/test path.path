@@ -3,45 +3,34 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.1537375178316684,
+        "x": 3.560328102710413,
         "y": 6.072838801711842
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.8550742703136738,
-        "y": 6.150016808248442
+        "x": 2.5655071356842125,
+        "y": 6.145095856489893
       },
       "isLocked": false,
-      "linkedName": "Depot"
+      "linkedName": "Top Depot"
     },
     {
       "anchor": {
-        "x": 1.6971611982881591,
-        "y": 5.257703281027104
+        "x": 1.1537375178316684,
+        "y": 6.072838801711842
       },
       "prevControl": {
-        "x": 1.960118312742511,
-        "y": 4.9862355725411796
+        "x": 1.497269541126648,
+        "y": 6.0746049801128645
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Depot"
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
-  "pointTowardsZones": [
-    {
-      "fieldPosition": {
-        "x": 4.634,
-        "y": 4.067
-      },
-      "rotationOffset": 0.0,
-      "minWaypointRelativePos": 0.5131667792032422,
-      "maxWaypointRelativePos": 0.75,
-      "name": "Hub"
-    }
-  ],
+  "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 0.5,
@@ -53,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -27.89727103094763
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Starting points",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

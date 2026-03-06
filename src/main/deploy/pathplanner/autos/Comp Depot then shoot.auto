@@ -7,19 +7,26 @@
         {
           "type": "named",
           "data": {
-            "name": "Pose"
+            "name": "Move to Depot"
           }
         },
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "Move to Depot"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Deploy Intake"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Deploy Intake"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 2.0
+                }
+              }
+            ]
           }
         },
         {

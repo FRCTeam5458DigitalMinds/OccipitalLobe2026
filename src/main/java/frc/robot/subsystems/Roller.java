@@ -21,10 +21,7 @@ public class Roller extends SubsystemBase {
   public Roller() {
 
     //Set up motors
-        RollerMotor = new TalonFX(Constants.IntakeConstants.rollerMotor);
-        
-        TalonFXConfiguration intakeConfigs = new TalonFXConfiguration();
-       
+        RollerMotor = new TalonFX(Constants.IntakeConstants.rollerMotor);       
         //
         TalonFXConfiguration RollerConfigs = new TalonFXConfiguration();
         RollerConfigs.CurrentLimits.withStatorCurrentLimit(40);
@@ -38,7 +35,7 @@ public class Roller extends SubsystemBase {
 
   }
   public Command setSpeed(double OutputPercent){
-    return run(
+    return runOnce(
       () -> {
         setRollers(OutputPercent);
       }

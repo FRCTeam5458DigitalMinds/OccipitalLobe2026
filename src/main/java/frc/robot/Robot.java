@@ -16,6 +16,7 @@ import frc.robot.Constants;
 import frc.robot.generated.TunerConstants;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.commands.PathfindingCommand;
 
 public class Robot extends TimedRobot {
     private Command m_autonomousCommand;
@@ -34,10 +35,19 @@ public class Robot extends TimedRobot {
     public Robot() {
         m_robotContainer = new RobotContainer();
     }
+    
+    @Override
+    public void robotInit() {
+        PathfindingCommand.warmupCommand().schedule();        
+    }
 
     @Override
     public void robotPeriodic() {
+
         m_timeAndJoystickReplay.update();
+
+        LimelightHelpers.setPipelineIndex(Constants.LimelightConstants.ll_Name, m_robotContainer.getPipelineCommand());
+
         // Retrieves the voltage currently entering the roboRIO
         double batteryVoltage = RobotController.getBatteryVoltage();
     
@@ -82,6 +92,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
+
         //Removes throttling(slowdown) of the limelight
         NetworkTableInstance.getDefault().getTable(dmllName).getEntry("throttle_set").setNumber(0);
 
@@ -97,15 +108,4 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopExit() {}
-
-    @Override
-    public void testInit() {
-        CommandScheduler.getInstance().cancelAll();
-    }
-
-    @Override
-    public void testPeriodic() {}
-
-    @Override
-    public void testExit() {}
 }

@@ -104,9 +104,10 @@ public class Shooter extends SubsystemBase {
         shooterRPS.put(1.8059915426872029,32.0);
         shooterRPS.put(2.5236079021737163,35.0);
         shooterRPS.put(4.226945331446267,40.0);
-
-        m_sysIdRoutine =
-          new SysIdRoutine(
+        
+        
+        //Week 3 feature
+        m_sysIdRoutine = new SysIdRoutine(
               new SysIdRoutine.Config(
          null,        // Use default ramp rate (1 V/s)
                   Volt.of(4), // Reduce dynamic step voltage to 4 to prevent brownout

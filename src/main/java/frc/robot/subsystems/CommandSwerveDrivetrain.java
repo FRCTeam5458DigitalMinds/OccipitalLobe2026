@@ -2,8 +2,11 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import org.json.simple.parser.ParseException;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
@@ -15,10 +18,12 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.FileVersionException;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
@@ -335,57 +340,51 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final Field2d m_field = new Field2d();
     private final Pigeon2 pigeon = new Pigeon2(TunerConstants.DrivetrainConstants.Pigeon2Id);
 
-    //Configures the pose estimator based on swerve drive encoders + pigeon
-    private final SwerveDrivePoseEstimator m_poseEstimator =
-    new SwerveDrivePoseEstimator(//borrowed from past code
-        getKinematics(),
-        pigeon.getRotation2d(),
-        getState().ModulePositions,
-        new Pose2d(),
-        VecBuilder.fill(1.5, 1.5, Units.degreesToRadians(5)),
-        VecBuilder.fill(1.5, 1.5, Units.degreesToRadians(30)));
+    //gets the pose of the robot
+    public Pose2d getPose()
+    {
+        return getState().Pose;
+    }
+    //Reset pose
+    public void resetPoseEstimator()
+    {
+        resetPose(getPose());
+    }
 
-    //Updates the position of the robot
+        //Updates the position of the robot
     public void updateOdometry() {
 
         //guesses where robot is on the field 
         m_field.setRobotPose(getPose());
 
-        //updates pose data
-        m_poseEstimator.update(
-            pigeon.getRotation2d(),
-            getState().ModulePositions);
-
         boolean doRejectUpdate = false;
 
         //sets up robot orientation based on tags
-        //LimelightHelpers.SetRobotOrientation(Constants.LimelightConstants.ll_Name, m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.SetRobotOrientation(Constants.LimelightConstants.ll_Name, getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
         
         //sets up megatag 2 
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.LimelightConstants.ll_Name);
  
         //if robot doesn't see any tags or robot turns too fast, don't update pose
-        if(Math.abs(pigeon.getAngularVelocityZDevice().getValueAsDouble()) > 720) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
-        {
-        doRejectUpdate = true;
-        }
+        if(Math.abs(pigeon.getAngularVelocityZWorld().getValueAsDouble()) > 360) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+            {
+                doRejectUpdate = true;
+            }
 
         if(mt2.tagCount == 0)
-        {
-
-        doRejectUpdate = true;
-        }
+            {
+                doRejectUpdate = true;
+            }
 
         //updates position based on tag if nothings wrong 
         if(!doRejectUpdate)
-        {
-
-        LimelightHelpers.SetRobotOrientation(Constants.LimelightConstants.ll_Name, m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-        m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,999999));
-        m_poseEstimator.addVisionMeasurement(
-            mt2.pose,
-            mt2.timestampSeconds);
-        }
+            {
+                LimelightHelpers.SetRobotOrientation(Constants.LimelightConstants.ll_Name, getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+                setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,999999));
+                addVisionMeasurement(
+                    mt2.pose,
+                    mt2.timestampSeconds);
+            }
     }
 
     private void configureAutoBuilder() {
@@ -418,16 +417,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
     }
 
-    //gets the pose of the robot
-    public Pose2d getPose()
-    {
-        return m_poseEstimator.getEstimatedPosition();
-    }
-    //Reset pose
-    public void resetPoseEstimator()
-    {
-        m_poseEstimator.resetPose(getState().Pose);
-    }
+    
 
     public boolean facingDriver(){
         double yaw = Math.abs(pigeon.getYaw().getValueAsDouble()%360);
@@ -439,4 +429,30 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void yawNum(){
         SmartDashboard.putNumber("YAW", Math.abs(pigeon.getYaw().getValueAsDouble()%360));
     }
+    //Auto section
+    public Command pathfind_test(String file){
+        PathPlannerPath path;
+        PathConstraints constraints = new PathConstraints(
+        0.5, 0.5,
+        Units.degreesToRadians(270), Units.degreesToRadians(360));
+        try {
+            path = PathPlannerPath.fromPathFile(file);
+            return AutoBuilder.pathfindThenFollowPath(
+                path,
+                constraints);
+        } catch (FileVersionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+
+    // Create the constraints to use while pathfinding. The constraints defined in the path will only be used for the path;
+    }
 }
+

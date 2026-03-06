@@ -6,13 +6,21 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.io.IOException;
+
+import org.json.simple.parser.ParseException;
+
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.FileVersionException;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -66,11 +74,10 @@ public class RobotContainer {
     
     private final SendableChooser<Command> autoChooser2;
 
-    private final int redConst = -1;
-    private int sideConst = -1;
+    private final SendableChooser<Integer> limelightPipelineChooser;
 
 
-    public RobotContainer() {
+    public RobotContainer(){
         //Pathplanner Auto Commands
         NamedCommands.registerCommand(
             "Main Shoot", 
@@ -103,41 +110,18 @@ public class RobotContainer {
             )
         );
 
-        //Shooter 
-        /*NamedCommands.registerCommand(
-            "Shoot", 
-            m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag())
-        );
-
-        //Hood
-        NamedCommands.registerCommand(
-            "Set Hood", 
-            m_Hood.runOnce(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
-        );
-
-        NamedCommands.registerCommand(
-            "Retract Hood", 
-            m_Hood.runOnce(()-> {m_Hood.toSetpoint(0);})
-        );
-
-        //Indexer
-        NamedCommands.registerCommand(
-            "Set Indexer", 
-            m_Indexer.setSpeed(65)
-        );
-        */
         //Intake
         NamedCommands.registerCommand(
             "Deploy Intake", 
             Commands.parallel(
-                m_Intake.runOnce(() -> {m_Intake.toSetpoint(1);}),
+                m_Intake.runOnce(() -> {m_Intake.toSetpoint(0);}),
                 m_Roller.setSpeed(80)
             )
         );
 
         NamedCommands.registerCommand(
             "Retract Intake", 
-            m_Intake.runOnce(() -> {m_Intake.toSetpoint(0);})
+            m_Intake.runOnce(() -> {m_Intake.toSetpoint(1);})
         );
 
         NamedCommands.registerCommand(
@@ -148,11 +132,6 @@ public class RobotContainer {
                 .andThen(m_Intake.retractIntake())
                 .andThen(Commands.waitSeconds(0.25))
             )
-        );
-
-        //Feeder
-        NamedCommands.registerCommand(
-            "Set Feeder", m_Feeder.setSpeed(65)
         );
 
         //Stop everything
@@ -170,10 +149,22 @@ public class RobotContainer {
             "Auto Rotate", 
             new AutoalignRotate(m_Limelight, drivetrain, MaxAngularRate, m_LED)
         );
+
+        NamedCommands.registerCommand("Move to Depot", drivetrain.pathfind_test("Move to Depot"));
+        NamedCommands.registerCommand("neutral zone", drivetrain.pathfind_test("neutral zone"));
+
         //Make an auto chooser on the smart dashboard
         autoChooser2 = AutoBuilder.buildAutoChooser();
         
         SmartDashboard.putData("Auto Chooser", autoChooser2); 
+
+        limelightPipelineChooser = new SendableChooser<>();
+
+        limelightPipelineChooser.setDefaultOption("Day", 0);
+        limelightPipelineChooser.addOption("Night", 1);
+        limelightPipelineChooser.addOption("Comp", 2);
+
+        SmartDashboard.putData("Pipeline Chooser", limelightPipelineChooser);
 
         configureBindings();
     }
@@ -359,5 +350,8 @@ public class RobotContainer {
     
     public Command getAutonomousCommand() {
         return autoChooser2.getSelected();
+    }
+    public int getPipelineCommand() {
+        return limelightPipelineChooser.getSelected();
     }
 }
