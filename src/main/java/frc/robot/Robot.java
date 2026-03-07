@@ -46,7 +46,7 @@ public class Robot extends TimedRobot {
 
         m_timeAndJoystickReplay.update();
 
-        LimelightHelpers.setPipelineIndex(Constants.LimelightConstants.ll_Name, m_robotContainer.getPipelineCommand());
+        LimelightHelpers.setPipelineIndex(Constants.LimelightConstants.ll_Name, m_robotContainer.getPipeline());
 
         // Retrieves the voltage currently entering the roboRIO
         double batteryVoltage = RobotController.getBatteryVoltage();

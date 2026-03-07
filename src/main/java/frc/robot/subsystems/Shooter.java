@@ -99,6 +99,8 @@ public class Shooter extends SubsystemBase {
         shooterRPS = new InterpolatingDoubleTreeMap();
         //Key: distance 
         //Value: velocity of shooter
+
+        //Will change
         shooterRPS.put(0.8732327907316006,24.0);        
         shooterRPS.put(1.1529219342235464,26.0);
         shooterRPS.put(1.8059915426872029,32.0);

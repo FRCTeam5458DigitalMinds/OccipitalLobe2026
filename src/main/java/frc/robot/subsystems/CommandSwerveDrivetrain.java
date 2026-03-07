@@ -432,6 +432,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     //Auto section
     public Command pathfind_test(String file){
         PathPlannerPath path;
+        // Create the constraints to use while pathfinding. The constraints defined in the path will only be used for the path;
+
         PathConstraints constraints = new PathConstraints(
         0.5, 0.5,
         Units.degreesToRadians(270), Units.degreesToRadians(360));
@@ -440,6 +442,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             return AutoBuilder.pathfindThenFollowPath(
                 path,
                 constraints);
+
+        //Required to catch or else errors will pop up
         } catch (FileVersionException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -450,9 +454,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        
         return null;
-
-    // Create the constraints to use while pathfinding. The constraints defined in the path will only be used for the path;
     }
 }
 

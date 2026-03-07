@@ -186,8 +186,9 @@ public class RobotContainer {
             m_Feeder.setSpeed(0)
         );
         m_Hood.setDefaultCommand(
-            m_Hood.toSetpoint(0)
-            .andThen(m_Hood.runOnce(() -> {m_Hood.getPosition();}))
+            //m_Hood.toSetpoint(0)
+            //.andThen(m_Hood.runOnce(() -> {m_Hood.getPosition();}))
+            m_Hood.runOnce(() -> {m_Hood.getPosition();})
         );
         m_Indexer.setDefaultCommand(
             m_Indexer.setSpeed(0)
@@ -208,6 +209,13 @@ public class RobotContainer {
         m_Limelight.setDefaultCommand(
             m_Limelight.runOnce(() -> {m_Limelight.getDistToNearestTag();})
         );
+
+        m_Climber.setDefaultCommand(
+            //m_Climber.stopMotors()
+            m_Climber.runOnce(()-> m_Climber.getPosition())
+        );
+
+        drivetrain.registerTelemetry(logger::telemeterize); 
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
@@ -277,11 +285,10 @@ public class RobotContainer {
                 m_Roller.setSpeed(80)
             )
         );
-
-        drivetrain.registerTelemetry(logger::telemeterize); 
         
         //Backup intake control
-        joystick.povUp().whileTrue(
+        //Was povUp (might change later)
+        joystick.x().whileTrue(
             m_Intake.runEnd(
                 () -> {m_Intake.setIntake(90);}, 
                 () -> {m_Intake.setIntake(0);}
@@ -306,15 +313,27 @@ public class RobotContainer {
         );
 
         //Run climb
-        /*joystick.povUp().whileTrue(
+        joystick.povUp().whileTrue(
             m_Climber.runEnd(
-                () -> {}, 
-                () -> {}
+                ()-> {m_Climber.setClimber(80);},
+                ()-> {m_Climber.setClimber(0);}
             )
-        );*/
+        );
+
+
+        joystick.povDown().whileTrue(
+            m_Climber.runEnd(
+                ()-> {m_Climber.setClimber(-80);},
+                ()-> {m_Climber.setClimber(0);}
+            )
+            //Move down from tower and rests climber
+            //new unclimb(drivetrain, m_Climber)
+        );
+
+        //work on later (Better shooter PID stuff)
 
         /* Joystick B = Quasistatic forward
-        Joystick X = Quasistatic reverse*/
+        Joystick X = Quasistatic reverse
 
         joystick.b().whileTrue(
             m_Shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
@@ -330,12 +349,13 @@ public class RobotContainer {
         joystick.povRight().onTrue(
             Commands.runOnce(SignalLogger::stop)
         );
-
+        
+        /* */
         //Testing purposes
         //test shooter rps
         joystick.rightBumper().whileTrue(
             Commands.parallel(
-                m_Shooter.PIDrunMotors(34),
+                m_Shooter.PIDrunMotors(SmartDashboard.getNumber("Testing RPS", 30)),
                 Commands.waitSeconds(1)
                 .andThen(
                     Commands.parallel(
@@ -351,7 +371,7 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         return autoChooser2.getSelected();
     }
-    public int getPipelineCommand() {
+    public int getPipeline() {
         return limelightPipelineChooser.getSelected();
     }
 }
