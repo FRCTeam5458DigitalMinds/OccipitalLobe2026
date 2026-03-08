@@ -18,11 +18,14 @@ public class Hood extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
 
   TalonFX hoodMotor;
-  //min, max, (later numbers)
-  private final double difference = 0;
-  private final double[] setpoints = {-0.05712890625, 10.63232421875};
+  //min, max, max for hub shooting
+  //66 degrees, N/A, 11 degrees
+
+  private final double[] setpoints = {-0.05712890625, 10.63232421875, 4.011962890625};
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
-    InterpolatingDoubleTreeMap hoodAngle;
+  private final InterpolatingDoubleTreeMap hoodAngle;
+  private final InterpolatingDoubleTreeMap NewhoodAngle;
+
 
 
   public Hood() {
@@ -39,25 +42,37 @@ public class Hood extends SubsystemBase {
 
         hoodMotor.getConfigurator().apply(hoodConfigs);
 
+        //Resets Hood encoder
         hoodMotor.setPosition(-0.05712890625);
 
+
+        /* 
+          Context to Interpolating Double Tree Map:
+          
+            *Creates a plot of data points
+            *Uses data points to estimate value based off key
+        */
+
+        //Sets up data table
         hoodAngle = new InterpolatingDoubleTreeMap();
 
-        //ngl might redo
         //Key: distance
         //Value: hood angle
+       
+        //Old data points as of 3/7/2026
         hoodAngle.put(0.8732327907316006,-0.06005859375);
         hoodAngle.put(1.1529219342235464,2.23974609375);
         hoodAngle.put(1.8059915426872029,5.30224609375);
         hoodAngle.put(2.5236079021737163,6.87060546875);
         hoodAngle.put(4.226945331446267,3.01318359375);
-        //3.894287109375 hood
-        //2.769357158757236 distance
-        //34 rps
+        
+        
+        //New table for later
+        NewhoodAngle = new InterpolatingDoubleTreeMap();
+        
     }
 
-
-    //Set speed for now
+    //Set speed of Hood motor
     public void setHood(double OutputPercent){
         OutputPercent /= 100.0;
         hoodMotor.set(OutputPercent);
@@ -70,24 +85,28 @@ public class Hood extends SubsystemBase {
             () -> {hoodMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(0));}
         );
     }
+
+    //Go to a hood position based on distance from tag
     public Command toTreeSetpoint(double distance){
         return runOnce(
             () -> {goToPostion(distance);}
-
         );
     }
+
+    //Function version of Command above
+    //Plus put predicted Hood angle in Dashboard
     public void goToPostion(double distance){
         hoodMotor.setControl(m_request.withPosition(hoodAngle.get(distance)).withSlot(0));
         SmartDashboard.putNumber("Predicted Hood angle", hoodAngle.get(distance));
     }
 
-    //testing purposes only
+    //Go to position not based on a setpoint
     public void customPosition(double setPoint)
     {
         hoodMotor.setControl(m_request.withPosition(setPoint).withSlot(0));
     }
     
-    //more testing
+    //Get encoder value of the Hood
     public double getPosition()
     {
         double encoder = hoodMotor.getPosition().getValueAsDouble();

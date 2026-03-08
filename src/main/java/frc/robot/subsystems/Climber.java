@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -38,8 +40,10 @@ public class Climber extends SubsystemBase {
 
         climberMotor.getConfigurator().apply(climbConfigs);
 
+        //Set idle mode
         climberMotor.setNeutralMode(NeutralModeValue.Brake);
 
+        //Reset encoder
         climberMotor.setPosition(0);
 
     }
@@ -68,11 +72,12 @@ public class Climber extends SubsystemBase {
      //Go to certain position based on setpoint index
     public Command toSetpoint(int setpointIndex)
     {
-        return runOnce(
+        return run(
             () -> {climberMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(0));}
         );
     }
-    //testing purposes only
+
+    //Go to position not based on a setpoint
     public void customPosition(double setPoint)
     {
         climberMotor.setControl(m_request.withPosition(setPoint).withSlot(0));
@@ -87,12 +92,20 @@ public class Climber extends SubsystemBase {
     }
 
     //Potenial climb command
-    public Command climb(){
+    /*public Command climb(){
         return Commands.sequence(
-            toSetpoint(2)
+            toSetpoint(2).until(::readytoClimb)
             .andThen(Commands.waitSeconds(0.25))
             .andThen(toSetpoint(3))
-        );
+        ); 
+    }*/
+    
+    //Checks if climber is high enough
+    public boolean readytoRest(){
+        if (getPosition() > 138){
+            return true;
+        }
+        return false;
     }
     
 }

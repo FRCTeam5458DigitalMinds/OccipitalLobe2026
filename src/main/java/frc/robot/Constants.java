@@ -17,7 +17,7 @@ public final class Constants {
   public static class ClimbConstants {
     public static final int climbMotor = 60;
 
-      public static final double climb_P = 0.0;
+      public static final double climb_P = 0.5; //
       public static final double climb_D = 0.0;
   }
 

@@ -19,6 +19,8 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.commands.PathfindingCommand;
 
 public class Robot extends TimedRobot {
+    public static final double RPS = 0;
+
     private Command m_autonomousCommand;
 
     private final RobotContainer m_robotContainer;
@@ -43,6 +45,8 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+
+
 
         m_timeAndJoystickReplay.update();
 
@@ -103,6 +107,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopPeriodic() {
+
         LimelightHelpers.SetIMUMode(dmllName, 4);
     }
 

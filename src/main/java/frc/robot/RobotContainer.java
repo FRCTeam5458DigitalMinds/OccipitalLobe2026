@@ -91,7 +91,8 @@ public class RobotContainer {
                         //On true, ferry mode
                         m_Hood.toSetpoint(1),
                         //On false, hub mode
-                        m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());}),
+                        //m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
+                        m_Hood.run(() -> {m_Hood.getPosition();}),
                         //Conditional: check if robot is facing drivers
                         drivetrain::facingDriver
                     )
@@ -186,9 +187,9 @@ public class RobotContainer {
             m_Feeder.setSpeed(0)
         );
         m_Hood.setDefaultCommand(
-            //m_Hood.toSetpoint(0)
-            //.andThen(m_Hood.runOnce(() -> {m_Hood.getPosition();}))
-            m_Hood.runOnce(() -> {m_Hood.getPosition();})
+            m_Hood.toSetpoint(0)
+            .andThen(m_Hood.runOnce(() -> {m_Hood.getPosition();}))
+            //m_Hood.runOnce(() -> {m_Hood.getPosition();})
         );
         m_Indexer.setDefaultCommand(
             m_Indexer.setSpeed(0)
@@ -243,12 +244,21 @@ public class RobotContainer {
                 //Two parts: run shooter and run hood depending on where the robot is facing
                 Commands.parallel(
                     //run shooter based on distance
-                    m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()),
+                    new ConditionalCommand(
+                        //On true, ferry mode
+                        m_Shooter.PIDrunMotors(30),
+                        //On false, hub mode
+                        m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()),
+                        //Conditional: check if robot is facing drivers
+                        drivetrain::facingDriver
+                    )
+                    ,
                     new ConditionalCommand(
                         //On true, ferry mode
                         m_Hood.toSetpoint(1),
                         //On false, hub mode
-                        m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());}),
+                        //m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
+                        m_Hood.run(() -> {m_Hood.getPosition();}),
                         //Conditional: check if robot is facing drivers
                         drivetrain::facingDriver
                     )
@@ -313,19 +323,43 @@ public class RobotContainer {
         );
 
         //Run climb
-        joystick.povUp().whileTrue(
-            m_Climber.runEnd(
-                ()-> {m_Climber.setClimber(80);},
-                ()-> {m_Climber.setClimber(0);}
+
+        joystick.povLeft().whileTrue(
+            m_Climber.toSetpoint(0)
+
+        );
+
+        joystick.povRight().and(joystick.b()).onTrue(
+            Commands.sequence(
+                m_Climber.toSetpoint(1).until(m_Climber::readytoRest)
+            .andThen(
+                drivetrain.runOnce(
+                    () -> {drivetrain.setControl(drive.withVelocityX(1));}
+                )
             )
+            .andThen(Commands.waitSeconds(0.5))
+            .andThen(drivetrain.runOnce(
+                    () -> {drivetrain.setControl(drive.withVelocityX(0));}
+                )
+            )
+            .andThen(m_Climber.toSetpoint(0))
+            )
+        );
+            /*Commands.sequence(
+            m_Climber.toSetpoint(1)//.until(m_Climber::readytoClimb)
+            .andThen(Commands.waitSeconds(0.25))
+            .andThen(m_Climber.toSetpoint(2))
+            )*/
+
+        joystick.povUp().whileTrue(
+            m_Climber.toSetpoint(1)
+
         );
 
 
         joystick.povDown().whileTrue(
-            m_Climber.runEnd(
-                ()-> {m_Climber.setClimber(-80);},
-                ()-> {m_Climber.setClimber(0);}
-            )
+            m_Climber.toSetpoint(2)
+
             //Move down from tower and rests climber
             //new unclimb(drivetrain, m_Climber)
         );
@@ -355,11 +389,11 @@ public class RobotContainer {
         //test shooter rps
         joystick.rightBumper().whileTrue(
             Commands.parallel(
-                m_Shooter.PIDrunMotors(SmartDashboard.getNumber("Testing RPS", 30)),
+                m_Shooter.PIDrunMotors(30),
                 Commands.waitSeconds(1)
                 .andThen(
                     Commands.parallel(
-                        m_Feeder.setSpeed(65), //
+                        m_Feeder.setSpeed(65),
                         m_Indexer.setSpeed(65)
                     )
                 )

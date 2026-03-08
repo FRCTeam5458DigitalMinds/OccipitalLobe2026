@@ -10,28 +10,34 @@ import frc.robot.Constants;
 public class LED extends SubsystemBase{
     private PowerDistribution sparkPDH = new PowerDistribution(Constants.LEDConstants.PDH, ModuleType.kRev);
 
+    //Turns on LED 
     public Command LEDon(){
      return run(() -> {turnOn();});
     }
   
+    //Turns off LED 
     public Command LEDoff(){
      return run(() -> {turnOff();});
     }
 
+    //Function version of turn off LED
     public void turnOff(){
         sparkPDH.setSwitchableChannel(false);
 
     }
 
+    //Function version of turn on LED
     public void turnOn(){
         sparkPDH.setSwitchableChannel(true);
     }
 
+    //Alternates on and off
     public Command blink(){
-        return 
+        return Commands.sequence( 
             LEDon()
             .andThen(Commands.waitSeconds(0.25))
             .andThen(LEDoff())
-            .andThen(Commands.waitSeconds(0.25));
+            .andThen(Commands.waitSeconds(0.25))
+        );
     }
 }

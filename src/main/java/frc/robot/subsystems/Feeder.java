@@ -25,13 +25,14 @@ public class Feeder extends SubsystemBase {
        
     }
 
+    //Sets speed of feeder
     public Command setSpeed(double OutputPercent){
       return run(
           () -> {
             setFeeder(OutputPercent);
           });
     }
-
+    //Function version of setting speed
      public void setFeeder(double OutputPercent)
     {
       OutputPercent /= 100.;

@@ -46,6 +46,8 @@ public class Shooter extends SubsystemBase {
     private final double maxRPM = 5500;
 
     InterpolatingDoubleTreeMap shooterRPS;
+    InterpolatingDoubleTreeMap NewshooterRPS;
+
 
     /*Notes:
     10%: 550
@@ -62,6 +64,7 @@ public class Shooter extends SubsystemBase {
 
     private final SysIdRoutine m_sysIdRoutine;
     private final VoltageOut m_voltReq = new VoltageOut(0.0);
+
 
 
     SysIdRoutine routine;
@@ -96,17 +99,31 @@ public class Shooter extends SubsystemBase {
 
         upperFlyMotor.setControl(new Follower(lowerFlyMotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
+
+
+        /* 
+          Context to Interpolating Double Tree Map:
+          
+            *Creates a plot of data points
+            *Uses data points to estimate value based off key
+        */
+        
         shooterRPS = new InterpolatingDoubleTreeMap();
         //Key: distance 
         //Value: velocity of shooter
 
         //Will change
+        // Old Numbers as of 3/7/2026
         shooterRPS.put(0.8732327907316006,24.0);        
         shooterRPS.put(1.1529219342235464,26.0);
         shooterRPS.put(1.8059915426872029,32.0);
         shooterRPS.put(2.5236079021737163,35.0);
         shooterRPS.put(4.226945331446267,40.0);
+
+        NewshooterRPS = new InterpolatingDoubleTreeMap();
+        //test later
         
+      
         
         //Week 3 feature
         m_sysIdRoutine = new SysIdRoutine(

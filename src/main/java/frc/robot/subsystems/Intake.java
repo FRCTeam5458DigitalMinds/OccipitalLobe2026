@@ -40,14 +40,17 @@ public class Intake extends SubsystemBase {
 
         intakeMotor.getConfigurator().apply(intakeConfigs);
 
+        //Resets encoder to this value
         intakeMotor.setPosition(-3.219970703125);
 
   }
 
-    //Negative means extends
+    //Sets speed of Intake
     public void setIntake(double OutputPercent)
     {
       OutputPercent /= 100.;
+
+      //Negative means extends
       intakeMotor.set(-OutputPercent);
     }
 
@@ -58,13 +61,13 @@ public class Intake extends SubsystemBase {
     }
 
 
-    //testing purposes only
+    //Go to position not based on a setpoint
     public void customPosition(double setPoint)
     {
         intakeMotor.setControl(m_request.withPosition(setPoint).withSlot(0));
     }
 
-    //more testing
+    //Get encoder value of the intake
     public double getPosition()
     {
         double intakeEncoder = intakeMotor.getPosition().getValueAsDouble();
@@ -73,22 +76,17 @@ public class Intake extends SubsystemBase {
     }
 
 
+    //Moves in based on current position
     public Command retractIntake(){
       return runOnce(
-        () -> {customPosition(getPosition()-5);}
-      );
-    }
-    public Command extendIntake(){
-      return runOnce(
-        () -> {customPosition(getPosition()+5);}
+        () -> {customPosition(getPosition()-10);}
       );
     }
 
-    /*Returns true if extended to max
-    public boolean atMax(){
-          if (getPosition() < setpoints[1] + 0.001){
-              return true;
-          }
-          return false;
-    }*/ 
+    //Moves out based on current position
+    public Command extendIntake(){
+      return runOnce(
+        () -> {customPosition(getPosition()+10);}
+      );
+    }
 }

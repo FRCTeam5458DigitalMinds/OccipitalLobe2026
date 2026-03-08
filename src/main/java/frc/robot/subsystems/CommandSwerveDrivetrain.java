@@ -418,7 +418,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     
-
+    //Checks if robot is facing driver station
     public boolean facingDriver(){
         double yaw = Math.abs(pigeon.getYaw().getValueAsDouble()%360);
         if (yaw > 320 || yaw < 40){
@@ -426,24 +426,33 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         return false;
     }
+    
+    //Prints Yaw on Dashboard
     public void yawNum(){
         SmartDashboard.putNumber("YAW", Math.abs(pigeon.getYaw().getValueAsDouble()%360));
     }
+
     //Auto section
+
+    //Runs pathfinder with path
     public Command pathfind_test(String file){
         PathPlannerPath path;
-        // Create the constraints to use while pathfinding. The constraints defined in the path will only be used for the path;
 
+        // Create the constraints to use while pathfinding. The constraints defined in the path will only be used for the path;
         PathConstraints constraints = new PathConstraints(
         0.5, 0.5,
         Units.degreesToRadians(270), Units.degreesToRadians(360));
+        
+        //Required to try/catch or else errors will pop up
         try {
+            //Sets path with file choosen
             path = PathPlannerPath.fromPathFile(file);
+
+            //Runs pathfinder with path
             return AutoBuilder.pathfindThenFollowPath(
                 path,
                 constraints);
-
-        //Required to catch or else errors will pop up
+        //Used if fail to read file
         } catch (FileVersionException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -454,7 +463,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+        //In case everything fails
         return null;
     }
 }
