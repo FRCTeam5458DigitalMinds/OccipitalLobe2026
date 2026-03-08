@@ -65,7 +65,7 @@ public class Shooter extends SubsystemBase {
     private final SysIdRoutine m_sysIdRoutine;
     private final VoltageOut m_voltReq = new VoltageOut(0.0);
 
-
+    Double testRPS;
 
     SysIdRoutine routine;
     public Shooter() {
@@ -107,7 +107,7 @@ public class Shooter extends SubsystemBase {
             *Creates a plot of data points
             *Uses data points to estimate value based off key
         */
-        
+
         shooterRPS = new InterpolatingDoubleTreeMap();
         //Key: distance 
         //Value: velocity of shooter
@@ -121,11 +121,15 @@ public class Shooter extends SubsystemBase {
         shooterRPS.put(4.226945331446267,40.0);
 
         NewshooterRPS = new InterpolatingDoubleTreeMap();
+        
+        NewshooterRPS.put(2.5055061242497207,34.0);
+        NewshooterRPS.put(1.4178527091316189,27.0);
+        NewshooterRPS.put(1.6360094234791194,29.0);
+        NewshooterRPS.put(3.2319892011747924,36.0);
+        NewshooterRPS.put(1.1445679370483035,25.73);
         //test later
         
-      
-        
-        //Week 3 feature
+        //After Week 3 feature
         m_sysIdRoutine = new SysIdRoutine(
               new SysIdRoutine.Config(
          null,        // Use default ramp rate (1 V/s)
@@ -140,6 +144,8 @@ public class Shooter extends SubsystemBase {
           this
         )
       );
+
+      SmartDashboard.putNumber("Test RPS", 30);
         
     }
 
@@ -175,7 +181,7 @@ public class Shooter extends SubsystemBase {
     public Command PIDrunMotors(double FlyRPS){
       return run(
           () -> {
-            setTargetRPM(FlyRPS);
+            setTargetRPS(FlyRPS);
           }
       );
     }
@@ -190,18 +196,32 @@ public class Shooter extends SubsystemBase {
     public Command PIDtreeRunMotors(double distance){
       return run(
           () -> {
-            setTargetRPM(shooterRPS.get(distance));
+            setTargetRPS(NewshooterRPS.get(distance));
+          }
+      );
+    }
+    public Command PIDtestRunMotors(){
+      return run(
+          () -> {
+            setTargetRPS(testRPS);
           }
       );
     }
 
-    public void setTargetRPM(double RPS){
+
+    public void setTargetRPS(double RPS){
       SmartDashboard.putNumber("RPS", lowerFlyMotor.getVelocity().getValueAsDouble());
       lowerFlyMotor.setControl(m_request.withVelocity(RPS));
     }
-
+    //After week 3 feature
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
    return m_sysIdRoutine.quasistatic(direction);
     }
+
+    //Continuously runs
+   @Override
+   public void periodic() {
+    testRPS = SmartDashboard.getNumber("Test RPS", 30);
+  }
 
 }

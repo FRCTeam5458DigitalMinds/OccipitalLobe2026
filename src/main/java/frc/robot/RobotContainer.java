@@ -195,8 +195,13 @@ public class RobotContainer {
             m_Indexer.setSpeed(0)
         );
         m_LED.setDefaultCommand(
-            m_LED.LEDon().repeatedly().onlyWhile(m_Limelight::isCentered)
-            .andThen(m_LED.LEDoff())
+            new ConditionalCommand(
+                m_LED.LEDon()
+                , 
+                m_LED.LEDoff()
+                , 
+                m_Limelight::checkForTarget
+            )
         );
         m_Roller.setDefaultCommand(
             m_Roller.setSpeed(0)
@@ -231,10 +236,10 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         // Controls
-        joystick.start().whileTrue(
+        /*joystick.start().whileTrue(
             new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate, m_LED).until(m_Limelight::isCentered)
             .andThen(m_LED.LEDon().repeatedly())
-        );
+        );*/
 
         //All this to shoot btw
         joystick.rightTrigger().whileTrue(
@@ -248,7 +253,8 @@ public class RobotContainer {
                         //On true, ferry mode
                         m_Shooter.PIDrunMotors(30),
                         //On false, hub mode
-                        m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()),
+                        m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag())
+                        .andThen(new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate, m_LED)),
                         //Conditional: check if robot is facing drivers
                         drivetrain::facingDriver
                     )
@@ -269,7 +275,7 @@ public class RobotContainer {
                 .andThen(
                     //Two parts: index & feeder and intake
                     Commands.parallel(
-                         //run both feeder and indexer
+                        //run both feeder and indexer
                         Commands.parallel(
                             m_Feeder.setSpeed(65),
                             m_Indexer.setSpeed(65)
@@ -389,12 +395,25 @@ public class RobotContainer {
         //test shooter rps
         joystick.rightBumper().whileTrue(
             Commands.parallel(
-                m_Shooter.PIDrunMotors(30),
+                m_Shooter.PIDtestRunMotors(),
+                //Part 2
+                //Add 1 Second delay of cmd group 2
                 Commands.waitSeconds(1)
                 .andThen(
+                    //Two parts: index & feeder and intake
                     Commands.parallel(
-                        m_Feeder.setSpeed(65),
-                        m_Indexer.setSpeed(65)
+                         //run both feeder and indexer
+                        Commands.parallel(
+                            m_Feeder.setSpeed(65),
+                            m_Indexer.setSpeed(90)
+                        ),
+                        //Oscillate intake
+                        Commands.repeatingSequence(
+                            m_Intake.retractIntake()
+                            .andThen(Commands.waitSeconds(0.3))
+                            .andThen(m_Intake.extendIntake())
+                            .andThen(Commands.waitSeconds(0.3))
+                        )
                     )
                 )
             )

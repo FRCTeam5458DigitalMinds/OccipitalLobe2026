@@ -95,6 +95,9 @@ public class Limelight extends SubsystemBase{
         else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11)){
             return 10;
         }
+        else if (alCurrentTargetsIDs.contains(5) && alCurrentTargetsIDs.contains(8)){
+            return 8;
+        }
         else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
             return 10;
         }
@@ -104,8 +107,11 @@ public class Limelight extends SubsystemBase{
         else if (alCurrentTargetsIDs.contains(10)){
             return 10;
         }
-        else{
+        else if (alCurrentTargetsIDs.isEmpty()){
             return 0;
+        }   
+        else{
+            return alCurrentTargetsIDs.get(0);
         }
    }
 

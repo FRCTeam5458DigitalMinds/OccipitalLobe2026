@@ -102,7 +102,7 @@ public class Climber extends SubsystemBase {
     
     //Checks if climber is high enough
     public boolean readytoRest(){
-        if (getPosition() > 138){
+        if (getPosition() > 139){
             return true;
         }
         return false;
