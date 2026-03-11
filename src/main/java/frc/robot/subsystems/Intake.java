@@ -34,6 +34,10 @@ public class Intake extends SubsystemBase {
         intakeConfigs.Slot0.kP = Constants.IntakeConstants.intake_P;
         intakeConfigs.Slot0.kD = Constants.IntakeConstants.intake_D; 
 
+        intakeConfigs.Slot1.kP = Constants.IntakeConstants.intake_P-0.5; //WILL CHANGE
+        intakeConfigs.Slot0.kD = Constants.IntakeConstants.intake_D; 
+
+
         //Setups current limits
         intakeConfigs.CurrentLimits.withStatorCurrentLimit(60);
         intakeConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
@@ -59,6 +63,11 @@ public class Intake extends SubsystemBase {
     {
         intakeMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(0));
     }
+    //Go to certain position based on setpoint index
+    public void slowerToSetpoint(int setpointIndex)
+    {
+        intakeMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(1));
+    }
 
 
     //Go to position not based on a setpoint
@@ -66,6 +75,8 @@ public class Intake extends SubsystemBase {
     {
         intakeMotor.setControl(m_request.withPosition(setPoint).withSlot(0));
     }
+    
+
 
     //Get encoder value of the intake
     public double getPosition()
@@ -88,5 +99,19 @@ public class Intake extends SubsystemBase {
       return runOnce(
         () -> {customPosition(getPosition()+10);}
       );
+    }
+    
+    //Test
+    public Command slowRetract(){
+      return runEnd(
+        () -> {setIntake(10);},
+        () -> {setIntake(0);}
+      ); 
+    }
+    public boolean atEnd(){
+      if (getPosition() < setpoints[1]+0.2){
+        return true;
+      }
+      return false;
     }
 }

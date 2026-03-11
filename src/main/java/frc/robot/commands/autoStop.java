@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
 import frc.robot.subsystems.*;
 
@@ -23,19 +24,25 @@ public class autoStop extends Command {
         this.HOOD = hood;
         this.ROLLER = roller;
         this.INTAKE = intake;
-        addRequirements(getRequirements());
-    
+
+        addRequirements(FEEDER);
+        addRequirements(INDEXER);
+        addRequirements(SHOOTER);
+        addRequirements(HOOD);
+        addRequirements(ROLLER);
+        addRequirements(INTAKE);    
     }
 
     public void initialize()
     {   
-
-        FEEDER.setSpeed(0)
-        .andThen(INDEXER.setSpeed(0))
-        .andThen(SHOOTER.stopMotors())
-        .andThen(HOOD.toSetpoint(0))
-        .andThen(ROLLER.setSpeed(0))
-        .andThen(INTAKE.runOnce(() -> {INTAKE.toSetpoint(1);}));
+        Commands.parallel(
+            INTAKE.runOnce(() -> {INTAKE.toSetpoint(1);}),
+            INDEXER.setSpeed(0),
+            SHOOTER.stopMotors(),
+            HOOD.toSetpoint(0),
+            ROLLER.setSpeed(0),
+            FEEDER.setSpeed(0) 
+        );
         isFinished();
     }
 

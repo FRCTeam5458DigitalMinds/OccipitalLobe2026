@@ -78,7 +78,7 @@ public class RobotContainer {
 
 
     public RobotContainer(){
-        //Pathplanner Auto Commands
+        //Pathplanner Auto Commands (might move to new file for readability)
         NamedCommands.registerCommand(
             "Main Shoot", 
             Commands.parallel(
@@ -105,10 +105,14 @@ public class RobotContainer {
                     //run both feeder and indexer
                     Commands.parallel(
                         m_Feeder.setSpeed(65),
-                        m_Indexer.setSpeed(65)
+                        m_Indexer.setSpeed(90)
                     )
                 )
             )
+        );
+        NamedCommands.registerCommand(
+            "Prepare shoot", 
+            m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag())
         );
 
         //Intake
@@ -127,12 +131,13 @@ public class RobotContainer {
 
         NamedCommands.registerCommand(
             "Oscillate", 
-            Commands.repeatingSequence(
+            m_Intake.slowRetract().until(m_Intake::atEnd)
+            /*Commands.repeatingSequence(
                 m_Intake.extendIntake()
-                .andThen(Commands.waitSeconds(0.25))
+                .andThen(Commands.waitSeconds(0.7))
                 .andThen(m_Intake.retractIntake())
-                .andThen(Commands.waitSeconds(0.25))
-            )
+                .andThen(Commands.waitSeconds(0.7))
+            )*/
         );
 
         //Stop everything
@@ -153,6 +158,8 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Move to Depot", drivetrain.pathfind_test("Move to Depot"));
         NamedCommands.registerCommand("neutral zone", drivetrain.pathfind_test("neutral zone"));
+        NamedCommands.registerCommand("Half of neutral zone", drivetrain.pathfind_test("Half of neutral zone"));
+
 
         //Make an auto chooser on the smart dashboard
         autoChooser2 = AutoBuilder.buildAutoChooser();
