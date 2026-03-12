@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -86,7 +87,8 @@ public class RobotContainer {
                 //Two parts: run shooter and run hood depending on where the robot is facing
                 Commands.parallel(
                     //run shooter based on distance
-                    m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()),
+                    //m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()),
+                    m_Shooter.PIDrunMotors(26),
                     new ConditionalCommand(
                         //On true, ferry mode
                         m_Hood.toSetpoint(1),
@@ -104,7 +106,7 @@ public class RobotContainer {
                     //Two parts: index & feeder
                     //run both feeder and indexer
                     Commands.parallel(
-                        m_Feeder.setSpeed(65),
+                        m_Feeder.setSpeed(90),
                         m_Indexer.setSpeed(90)
                     )
                 )
@@ -143,7 +145,23 @@ public class RobotContainer {
         //Stop everything
         NamedCommands.registerCommand(
             "Stop everything", 
-            new autoStop(m_Feeder,m_Indexer,m_Shooter,m_Hood,m_Roller, m_Intake)
+            Commands.parallel(
+            //m_Intake.runOnce(() -> {m_Intake.toSetpoint(1);}),
+            m_Indexer.setSpeed(0),
+            m_Shooter.stopMotors(),
+            m_Hood.toSetpoint(0),
+            m_Roller.setSpeed(0),
+            m_Feeder.setSpeed(0) 
+            ).withTimeout(0.1)
+        );
+
+        NamedCommands.registerCommand("Setup Climb", 
+            m_Climber.toSetpoint(1)
+        );
+
+        NamedCommands.registerCommand("Lower Climber", 
+            //m_Climber.toSetpoint(3)
+            Commands.none()
         );
 
         //Other commands
@@ -159,6 +177,8 @@ public class RobotContainer {
         NamedCommands.registerCommand("Move to Depot", drivetrain.pathfind_test("Move to Depot"));
         NamedCommands.registerCommand("neutral zone", drivetrain.pathfind_test("neutral zone"));
         NamedCommands.registerCommand("Half of neutral zone", drivetrain.pathfind_test("Half of neutral zone"));
+        NamedCommands.registerCommand("Move back from hub", drivetrain.pathfind_test("Move back from hub"));
+        NamedCommands.registerCommand("top climb", drivetrain.pathfind_test("top climb"));
 
 
         //Make an auto chooser on the smart dashboard
@@ -402,25 +422,31 @@ public class RobotContainer {
         //test shooter rps
         joystick.rightBumper().whileTrue(
             Commands.parallel(
-                m_Shooter.PIDtestRunMotors(),
+                //Part 1
+                //Two parts: run shooter and run hood depending on where the robot is facing
+                Commands.parallel(
+                    //run shooter based on distance
+                    m_Shooter.PIDtestRunMotors(),
+                    new ConditionalCommand(
+                        //On true, ferry mode
+                        m_Hood.toSetpoint(1),
+                        //On false, hub mode
+                        //m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
+                        m_Hood.run(() -> {m_Hood.getPosition();}),
+                        //Conditional: check if robot is facing drivers
+                        drivetrain::facingDriver
+                    )
+                ),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
                 Commands.waitSeconds(1)
                 .andThen(
-                    //Two parts: index & feeder and intake
+                    //Two parts: index & feeder
+                    //run both feeder and indexer
                     Commands.parallel(
-                         //run both feeder and indexer
-                        Commands.parallel(
-                            m_Feeder.setSpeed(65),
-                            m_Indexer.setSpeed(90)
-                        ),
-                        //Oscillate intake
-                        Commands.repeatingSequence(
-                            m_Intake.retractIntake()
-                            .andThen(Commands.waitSeconds(0.3))
-                            .andThen(m_Intake.extendIntake())
-                            .andThen(Commands.waitSeconds(0.3))
-                        )
+                        m_Feeder.setSpeed(90),
+                        m_Indexer.setSpeed(90),
+                        Commands.waitSeconds(1).andThen(m_Intake.slowRetract().until(m_Intake::atEnd))
                     )
                 )
             )

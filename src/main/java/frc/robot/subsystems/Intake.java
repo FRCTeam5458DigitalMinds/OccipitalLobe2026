@@ -75,6 +75,10 @@ public class Intake extends SubsystemBase {
     {
         intakeMotor.setControl(m_request.withPosition(setPoint).withSlot(0));
     }
+    public void slowerCustomPosition(double setPoint){
+        intakeMotor.setControl(m_request.withPosition(setPoint).withSlot(1));
+
+    }
     
 
 
@@ -100,8 +104,20 @@ public class Intake extends SubsystemBase {
         () -> {customPosition(getPosition()+10);}
       );
     }
+    public Command SlowretractIntake(){
+      return runOnce(
+        () -> {slowerCustomPosition(getPosition()-10);}
+      );
+    }
+
+    //Moves out based on current position
+    public Command SlowextendIntake(){
+      return runOnce(
+        () -> {slowerCustomPosition(getPosition()+10);}
+      );
+    }
     
-    //Test
+    //works
     public Command slowRetract(){
       return runEnd(
         () -> {setIntake(10);},
@@ -109,9 +125,6 @@ public class Intake extends SubsystemBase {
       ); 
     }
     public boolean atEnd(){
-      if (getPosition() < setpoints[1]+0.2){
-        return true;
-      }
-      return false;
+      return getPosition() < setpoints[1]+0.2;
     }
 }
