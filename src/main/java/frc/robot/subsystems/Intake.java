@@ -120,7 +120,7 @@ public class Intake extends SubsystemBase {
     //works
     public Command slowRetract(){
       return runEnd(
-        () -> {setIntake(10);},
+        () -> {setIntake(15);},
         () -> {setIntake(0);}
       ); 
     }

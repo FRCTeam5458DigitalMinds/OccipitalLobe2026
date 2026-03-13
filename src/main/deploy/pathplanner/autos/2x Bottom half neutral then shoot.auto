@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Half of neutral zone"
+            "pathName": "Bottom Half of neutral zone"
           }
         },
         {
@@ -32,7 +32,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "top trench to hub"
+            "pathName": "Bottom trench to hub"
           }
         },
         {
@@ -82,7 +82,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Closer Half of neutral zone"
+            "name": "Closer Bottom Half of neutral zone"
           }
         },
         {
@@ -107,7 +107,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "top trench to hub"
+            "pathName": "Bottom trench to hub"
           }
         },
         {

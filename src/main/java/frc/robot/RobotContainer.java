@@ -88,7 +88,7 @@ public class RobotContainer {
                 Commands.parallel(
                     //run shooter based on distance
                     //m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()),
-                    m_Shooter.PIDrunMotors(26),
+                    m_Shooter.PIDrunMotors(25.5),
                     new ConditionalCommand(
                         //On true, ferry mode
                         m_Hood.toSetpoint(1),
@@ -101,7 +101,7 @@ public class RobotContainer {
                 ),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
-                Commands.waitSeconds(1)
+                Commands.waitSeconds(0.25)
                 .andThen(
                     //Two parts: index & feeder
                     //run both feeder and indexer
@@ -148,9 +148,9 @@ public class RobotContainer {
             Commands.parallel(
             //m_Intake.runOnce(() -> {m_Intake.toSetpoint(1);}),
             m_Indexer.setSpeed(0),
-            m_Shooter.stopMotors(),
+            //m_Shooter.stopMotors(),
             m_Hood.toSetpoint(0),
-            m_Roller.setSpeed(0),
+            //m_Roller.setSpeed(0),
             m_Feeder.setSpeed(0) 
             ).withTimeout(0.1)
         );
@@ -179,7 +179,8 @@ public class RobotContainer {
         NamedCommands.registerCommand("Half of neutral zone", drivetrain.pathfind_test("Half of neutral zone"));
         NamedCommands.registerCommand("Move back from hub", drivetrain.pathfind_test("Move back from hub"));
         NamedCommands.registerCommand("top climb", drivetrain.pathfind_test("top climb"));
-
+        NamedCommands.registerCommand("Closer Half of neutral zone", drivetrain.pathfind_test("Closer Half of neutral zone"));
+        NamedCommands.registerCommand("Closer Bottom Half of neutral zone", drivetrain.pathfind_test("Closer Bottom Half of neutral zone"));
 
         //Make an auto chooser on the smart dashboard
         autoChooser2 = AutoBuilder.buildAutoChooser();
@@ -278,7 +279,7 @@ public class RobotContainer {
                     //run shooter based on distance
                     new ConditionalCommand(
                         //On true, ferry mode
-                        m_Shooter.PIDrunMotors(30),
+                        m_Shooter.PIDrunMotors(25.5), //Will change
                         //On false, hub mode
                         m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag())
                         .andThen(new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate, m_LED)),
@@ -307,13 +308,9 @@ public class RobotContainer {
                             m_Feeder.setSpeed(65),
                             m_Indexer.setSpeed(65)
                         ),
-                        //Oscillate intake
-                        Commands.repeatingSequence(
-                            m_Intake.retractIntake()
-                            .andThen(Commands.waitSeconds(0.3))
-                            .andThen(m_Intake.extendIntake())
-                            .andThen(Commands.waitSeconds(0.3))
-                        )
+                        //
+                        Commands.waitSeconds(1).andThen(m_Intake.slowRetract().until(m_Intake::atEnd))
+
                     )
                 )
             )

@@ -440,7 +440,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         // Create the constraints to use while pathfinding. The constraints defined in the path will only be used for the path;
         PathConstraints constraints = new PathConstraints(
         2, 2,
-        Units.degreesToRadians(540), Units.degreesToRadians(720));
+        Units.degreesToRadians(270), Units.degreesToRadians(360));
         
         //Required to try/catch or else errors will pop up
         try {
