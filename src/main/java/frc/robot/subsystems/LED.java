@@ -40,4 +40,13 @@ public class LED extends SubsystemBase{
             .andThen(Commands.waitSeconds(0.25))
         );
     }
+    public void showTagStatus(boolean tagVisible) {
+
+        if (tagVisible) {
+            turnOn();     // LED red when tag detected
+        } 
+        else {
+            turnOff();    // LED off when no tag
+        }
+    }
 }

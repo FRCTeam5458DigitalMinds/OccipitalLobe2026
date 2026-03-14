@@ -22,7 +22,7 @@ public class Climber extends SubsystemBase {
     TalonFX climberMotor;
 
     //Min (0), max (1), climb down (2)
-    private final double[] setpoints = {0,139.50048828125,75};
+    private final double[] setpoints = {0,139.50048828125,68};
 
     private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
 

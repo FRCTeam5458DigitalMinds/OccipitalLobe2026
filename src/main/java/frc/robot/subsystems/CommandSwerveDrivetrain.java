@@ -382,7 +382,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if(!doRejectUpdate)
             {
                 LimelightHelpers.SetRobotOrientation(Constants.LimelightConstants.ll_Name, getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-                setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,999999));
+                setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,999999));
                 addVisionMeasurement(
                     mt2.pose,
                     mt2.timestampSeconds);

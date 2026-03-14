@@ -7,6 +7,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -26,6 +27,9 @@ public class Limelight extends SubsystemBase{
    
    //info from tag
    int id;
+
+   private final int[] redTags = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
+   private final int[] blueTags = {17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
 
 //pose thingys
    private LimelightHelpers.PoseEstimate limelightMeasurement = new LimelightHelpers.PoseEstimate();
@@ -77,42 +81,85 @@ public class Limelight extends SubsystemBase{
         for (RawFiducial fiducial : currentFiducials) {//moves raw fiducial ids to target ids
             alCurrentTargetsIDs.add(fiducial.id);
         }
+        
+
+        //Red alliance
+        if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red){
+            if (alCurrentTargetsIDs.contains(5) && alCurrentTargetsIDs.contains(8) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
+            return 9;
+            }
+            else if (alCurrentTargetsIDs.contains(2) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11)){
+                return 11;
+            }
+            else if (alCurrentTargetsIDs.contains(8) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
+                return 9;
+            }
+            else if (alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11) && alCurrentTargetsIDs.contains(2)){
+                return 11;
+            }
+            else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11)){
+                return 10;
+            }
+            else if (alCurrentTargetsIDs.contains(5) && alCurrentTargetsIDs.contains(8)){
+                return 8;
+            }
+            else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
+                return 10;
+            }
+            else if (alCurrentTargetsIDs.contains(11) && alCurrentTargetsIDs.contains(2)){
+                return 11;
+            }
+            else if (alCurrentTargetsIDs.contains(10)){
+                return 10;
+            }
+            else if (alCurrentTargetsIDs.isEmpty()){
+                return 0;
+            } 
+            else{
+                return alCurrentTargetsIDs.get(0);
+            }
+        }
+        
+        //Blue alliance
+        else{
+            if (alCurrentTargetsIDs.contains(21) && alCurrentTargetsIDs.contains(24) && alCurrentTargetsIDs.contains(25) && alCurrentTargetsIDs.contains(26)){
+                return 25;
+            }
+            else if (alCurrentTargetsIDs.contains(18) && alCurrentTargetsIDs.contains(25) && alCurrentTargetsIDs.contains(26) && alCurrentTargetsIDs.contains(27)){
+                return 27;
+            }
+            else if (alCurrentTargetsIDs.contains(24) && alCurrentTargetsIDs.contains(25) && alCurrentTargetsIDs.contains(26)){
+                return 25;
+            }
+            else if (alCurrentTargetsIDs.contains(26) && alCurrentTargetsIDs.contains(27) && alCurrentTargetsIDs.contains(18)){
+                return 27;
+            }
+            else if (alCurrentTargetsIDs.contains(25) && alCurrentTargetsIDs.contains(26) && alCurrentTargetsIDs.contains(27)){
+                return 26;
+            }
+            else if (alCurrentTargetsIDs.contains(21) && alCurrentTargetsIDs.contains(24)){
+                return 24;
+            }
+            else if (alCurrentTargetsIDs.contains(25) && alCurrentTargetsIDs.contains(26)){
+                return 26;
+            }
+            else if (alCurrentTargetsIDs.contains(27) && alCurrentTargetsIDs.contains(18)){
+                return 27;
+            }
+            else if (alCurrentTargetsIDs.contains(26)){
+                return 26;
+            }
+            else if (alCurrentTargetsIDs.isEmpty()){
+                return 0;
+            } 
+            else{
+                return alCurrentTargetsIDs.get(0);
+            }
+        }
 
         //Note: add red field tags
         //groups tags & picks a tag
-        if (alCurrentTargetsIDs.contains(5) && alCurrentTargetsIDs.contains(8) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
-            return 9;
-        }
-        else if (alCurrentTargetsIDs.contains(2) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11)){
-            return 11;
-        }
-        else if (alCurrentTargetsIDs.contains(8) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
-            return 9;
-        }
-        else if (alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11) && alCurrentTargetsIDs.contains(2)){
-            return 11;
-        }
-        else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11)){
-            return 10;
-        }
-        else if (alCurrentTargetsIDs.contains(5) && alCurrentTargetsIDs.contains(8)){
-            return 8;
-        }
-        else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
-            return 10;
-        }
-        else if (alCurrentTargetsIDs.contains(11) && alCurrentTargetsIDs.contains(2)){
-            return 11;
-        }
-        else if (alCurrentTargetsIDs.contains(10)){
-            return 10;
-        }
-        else if (alCurrentTargetsIDs.isEmpty()){
-            return 0;
-        }   
-        else{
-            return alCurrentTargetsIDs.get(0);
-        }
+          
    }
 
    public Double getDistToNearestTag(){
@@ -134,6 +181,53 @@ public class Limelight extends SubsystemBase{
       //Distance from tag to front of bumper
       return distance - halfofBumper;
    }
+
+   
+    private double filteredShooterDistance = 2.2;
+    private boolean hasValidShooterDistance = false;
+   public void updateShooterDistance() {
+
+    double halfofBumper = 0.87/2; //Distance from center to edge of bumper
+
+    RawFiducial[] currentFiducials = getFiducialData();
+    int targetId = priorityTag();
+
+    for (RawFiducial fiducial : currentFiducials) {
+        if (fiducial.id == targetId) {
+            double measuredDistance = fiducial.distToRobot - halfofBumper;
+
+            if (!hasValidShooterDistance) {
+                filteredShooterDistance = measuredDistance;
+            } else {
+                double delta = measuredDistance - filteredShooterDistance;
+
+                // Reject big single-frame jumps
+                if (Math.abs(delta) < 0.35) {
+                    filteredShooterDistance =
+                        filteredShooterDistance
+                        + 0.25 * delta;
+                }
+            }
+
+            hasValidShooterDistance = true;
+            SmartDashboard.putNumber("Shooter Raw Distance", measuredDistance);
+            SmartDashboard.putNumber("Shooter Filtered Distance", filteredShooterDistance);
+            return;
+        }
+    }
+
+    // Keep last good value if no valid target this frame
+    SmartDashboard.putNumber("Shooter Raw Distance", 2.2);
+    SmartDashboard.putNumber("Shooter Filtered Distance", filteredShooterDistance);
+    }
+    
+    public double getShooterDistance() {
+        return filteredShooterDistance;
+    }
+
+    public boolean hasShooterDistance() {
+        return hasValidShooterDistance;
+    }
    
   public double limelight_aim_proportional(Double robotMaxAngularSpeed, double currentTX){    
     // kP (constant of proportionality)
@@ -197,6 +291,25 @@ public class Limelight extends SubsystemBase{
     
     //If not, assume it is not
     return false;
+  }
+
+  //Note: if this doesn't work, make two comp pipelines for just red or blue tags
+  public void setPriorityTags(){
+    if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red){
+        for (int tag : redTags){
+            LimelightHelpers.setPriorityTagID(dmllName, tag);
+        }
+    }
+    else{
+        for (int tag : blueTags){
+            LimelightHelpers.setPriorityTagID(dmllName, tag);
+        }
+    }
+  }
+  @Override
+  public void periodic(){
+    setPriorityTags();
+    updateShooterDistance();
   }
 }
 

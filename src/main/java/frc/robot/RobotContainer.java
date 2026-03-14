@@ -79,7 +79,27 @@ public class RobotContainer {
 
 
     public RobotContainer(){
-        //Pathplanner Auto Commands (might move to new file for readability)
+        configureNamedCommands();
+
+        //Make an auto chooser on the smart dashboard
+        autoChooser2 = AutoBuilder.buildAutoChooser();
+        
+        SmartDashboard.putData("Auto Chooser", autoChooser2); 
+
+        limelightPipelineChooser = new SendableChooser<>();
+
+        limelightPipelineChooser.setDefaultOption("Day", 0);
+        limelightPipelineChooser.addOption("Night", 1);
+        limelightPipelineChooser.addOption("Comp", 2);
+
+        SmartDashboard.putData("Pipeline Chooser", limelightPipelineChooser);
+
+        configureBindings();
+    }
+
+    //Named commands section
+    private void configureNamedCommands(){
+        //Pathplanner Auto Commands
         NamedCommands.registerCommand(
             "Main Shoot", 
             Commands.parallel(
@@ -171,7 +191,7 @@ public class RobotContainer {
         );
         NamedCommands.registerCommand(
             "Auto Rotate", 
-            new AutoalignRotate(m_Limelight, drivetrain, MaxAngularRate, m_LED)
+            new AutoalignRotate(m_Limelight, drivetrain, MaxAngularRate)
         );
 
         NamedCommands.registerCommand("Move to Depot", drivetrain.pathfind_test("Move to Depot"));
@@ -181,21 +201,6 @@ public class RobotContainer {
         NamedCommands.registerCommand("top climb", drivetrain.pathfind_test("top climb"));
         NamedCommands.registerCommand("Closer Half of neutral zone", drivetrain.pathfind_test("Closer Half of neutral zone"));
         NamedCommands.registerCommand("Closer Bottom Half of neutral zone", drivetrain.pathfind_test("Closer Bottom Half of neutral zone"));
-
-        //Make an auto chooser on the smart dashboard
-        autoChooser2 = AutoBuilder.buildAutoChooser();
-        
-        SmartDashboard.putData("Auto Chooser", autoChooser2); 
-
-        limelightPipelineChooser = new SendableChooser<>();
-
-        limelightPipelineChooser.setDefaultOption("Day", 0);
-        limelightPipelineChooser.addOption("Night", 1);
-        limelightPipelineChooser.addOption("Comp", 2);
-
-        SmartDashboard.putData("Pipeline Chooser", limelightPipelineChooser);
-
-        configureBindings();
     }
 
     private void configureBindings() {
@@ -223,12 +228,10 @@ public class RobotContainer {
             m_Indexer.setSpeed(0)
         );
         m_LED.setDefaultCommand(
-            new ConditionalCommand(
-                m_LED.LEDon()
-                , 
-                m_LED.LEDoff()
-                , 
-                m_Limelight::checkForTarget
+            m_LED.run(
+                ()-> {
+                    m_LED.showTagStatus(m_Limelight.checkForTarget());
+                }
             )
         );
         m_Roller.setDefaultCommand(
@@ -282,7 +285,7 @@ public class RobotContainer {
                         m_Shooter.PIDrunMotors(25.5), //Will change
                         //On false, hub mode
                         m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag())
-                        .andThen(new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate, m_LED)),
+                        .andThen(new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate)),
                         //Conditional: check if robot is facing drivers
                         drivetrain::facingDriver
                     )
@@ -305,8 +308,8 @@ public class RobotContainer {
                     Commands.parallel(
                         //run both feeder and indexer
                         Commands.parallel(
-                            m_Feeder.setSpeed(65),
-                            m_Indexer.setSpeed(65)
+                            m_Feeder.setSpeed(90),
+                            m_Indexer.setSpeed(90)
                         ),
                         //
                         Commands.waitSeconds(1).andThen(m_Intake.slowRetract().until(m_Intake::atEnd))
@@ -373,7 +376,7 @@ public class RobotContainer {
                 )
             )
             .andThen(m_Climber.toSetpoint(0))
-            )
+            ).withTimeout(2)
         );
             /*Commands.sequence(
             m_Climber.toSetpoint(1)//.until(m_Climber::readytoClimb)

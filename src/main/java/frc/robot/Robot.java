@@ -40,17 +40,16 @@ public class Robot extends TimedRobot {
     
     @Override
     public void robotInit() {
-        PathfindingCommand.warmupCommand().schedule();        
+        PathfindingCommand.warmupCommand().schedule();
+                
     }
 
     @Override
     public void robotPeriodic() {
 
-
-
         m_timeAndJoystickReplay.update();
 
-        LimelightHelpers.setPipelineIndex(Constants.LimelightConstants.ll_Name, m_robotContainer.getPipeline());
+        LimelightHelpers.setPipelineIndex(dmllName, m_robotContainer.getPipeline());
 
         // Retrieves the voltage currently entering the roboRIO
         double batteryVoltage = RobotController.getBatteryVoltage();

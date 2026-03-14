@@ -18,8 +18,6 @@ public class AdjustShooter extends Command {
     Shooter SHOOTER;
     Limelight LIMELIGHT;
 
-
-
     public AdjustShooter(Hood hood, Shooter shooter, Limelight limelight) 
     {
         this.HOOD = hood;
@@ -30,7 +28,6 @@ public class AdjustShooter extends Command {
         addRequirements(shooter);
         addRequirements(limelight);
         
-
     }
 
     public void initialize()

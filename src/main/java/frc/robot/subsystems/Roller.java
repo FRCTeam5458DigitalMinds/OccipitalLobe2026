@@ -27,7 +27,6 @@ public class Roller extends SubsystemBase {
         RollerConfigs.CurrentLimits.withStatorCurrentLimit(40);
         RollerConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
 
-        RollerConfigs.Voltage.withPeakForwardVoltage(8);
         RollerConfigs.TorqueCurrent.withPeakForwardTorqueCurrent(20)
             .withPeakReverseTorqueCurrent(-20);
 

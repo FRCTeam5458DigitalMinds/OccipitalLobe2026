@@ -18,21 +18,18 @@ public class AutoalignRotate extends Command {
     CommandSwerveDrivetrain DRIVETRAIN;
     SwerveRequest.RobotCentric robotDrive;
 
-    LED LED;
 
     Double maxAnglSpeed; //Max Angular Speed
 
-    public AutoalignRotate(Limelight limelight, CommandSwerveDrivetrain drivetrain, Double maxAngularSpeed, LED led) 
+    public AutoalignRotate(Limelight limelight, CommandSwerveDrivetrain drivetrain, Double maxAngularSpeed) 
     {
         this.LIMELIGHT = limelight;
         this.DRIVETRAIN = drivetrain;
         robotDrive = new SwerveRequest.RobotCentric().withDriveRequestType(DriveRequestType.OpenLoopVoltage);
         maxAnglSpeed = maxAngularSpeed;
-        this.LED = led;
 
         addRequirements(limelight);
         addRequirements(drivetrain);
-        addRequirements(LED);    
     }
 
     //puts the Target ID on the Dashboard
