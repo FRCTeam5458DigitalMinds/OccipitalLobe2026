@@ -3,8 +3,11 @@
   "robotLength": 0.87,
   "holonomicMode": true,
   "pathFolders": [
-    "From trench",
-    "Starting points"
+    "Bottom half trench",
+    "Climb",
+    "Across Neutral",
+    "Starting points",
+    "Top Half trench"
   ],
   "autoFolders": [],
   "defaultMaxVel": 2.5,

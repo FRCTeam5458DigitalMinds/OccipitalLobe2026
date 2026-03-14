@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.478972895863052,
-        "y": 0.71623395149786
+        "x": 4.504850213980028,
+        "y": 0.706
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.20262009318445,
-        "y": 0.6327513734560023
+        "x": 4.228497411301426,
+        "y": 0.6225174219581423
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Bottom Trench"
     },
     {
       "anchor": {
@@ -84,10 +84,10 @@
     "rotation": 53.99379239875556
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Bottom half trench",
   "idealStartingState": {
     "velocity": 2.0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

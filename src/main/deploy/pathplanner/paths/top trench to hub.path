@@ -84,10 +84,10 @@
     "rotation": -60.06848815949216
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Top Half trench",
   "idealStartingState": {
     "velocity": 2.0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }
