@@ -120,11 +120,14 @@ public class Intake extends SubsystemBase {
     //works
     public Command slowRetract(){
       return runEnd(
-        () -> {setIntake(15);},
+        () -> {setIntake(7);},
         () -> {setIntake(0);}
       ); 
     }
     public boolean atEnd(){
-      return getPosition() < setpoints[1]+0.2;
+      return getPosition() < setpoints[1]+((setpoints[1]+Math.abs(setpoints[0]))/2);
+    }
+    public boolean AutoatEnd(){
+      return getPosition() < setpoints[1]+((setpoints[1]+Math.abs(setpoints[0]))/4);
     }
 }

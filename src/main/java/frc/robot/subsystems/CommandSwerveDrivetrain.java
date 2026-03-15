@@ -150,8 +150,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        //pigeon.reset();
-        seedFieldCentric();
+        pigeon.reset();
+        //seedFieldCentric();
         configureAutoBuilder();
         //Puts field onto Elastic
         SmartDashboard.putData("Field", m_field);

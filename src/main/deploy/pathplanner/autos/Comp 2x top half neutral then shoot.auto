@@ -46,7 +46,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 2.0
+                        "waitTime": 1.5
                       }
                     },
                     {
@@ -67,7 +67,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 3.5
+                  "waitTime": 8.0
                 }
               }
             ]
@@ -80,9 +80,15 @@
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "Closer Half of neutral zone"
+            "pathName": "hub to Top Trench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Closer Half of neutral zone"
           }
         },
         {
@@ -121,7 +127,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 2.0
+                        "waitTime": 1.5
                       }
                     },
                     {

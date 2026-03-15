@@ -3,45 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.466034236804564,
-        "y": 7.405520684736091
+        "x": 3.302,
+        "y": 6.125
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.825603527815003,
-        "y": 7.532986178994723
+        "x": 3.2325504151772595,
+        "y": 6.365159853364273
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.301554921540655,
-        "y": 7.120870185449359
+        "x": 3.302,
+        "y": 7.121
       },
       "prevControl": {
-        "x": 3.3943507340121597,
-        "y": 7.353010094098762
+        "x": 3.1096755045879254,
+        "y": 6.913710703677715
       },
       "nextControl": {
-        "x": 3.0519061971953416,
-        "y": 6.496343813833641
+        "x": 3.7682903320343972,
+        "y": 7.623572460165291
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.301554921540655,
-        "y": 6.1245934379457925
+        "x": 4.414279600570612,
+        "y": 7.392582025677603
       },
       "prevControl": {
-        "x": 3.301618143224501,
-        "y": 6.37459342995183
+        "x": 4.091593802368664,
+        "y": 7.397035860690365
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Top Trench"
     }
   ],
   "rotationTargets": [],
@@ -53,15 +53,15 @@
         "y": 3.8
       },
       "rotationOffset": 0.0,
-      "minWaypointRelativePos": 1.35,
-      "maxWaypointRelativePos": 1.5,
+      "minWaypointRelativePos": 0.7,
+      "maxWaypointRelativePos": 0.75,
       "name": "point toward the hub"
     }
   ],
   "eventMarkers": [
     {
       "name": "Prepare shoot",
-      "waypointRelativePos": 0.45,
+      "waypointRelativePos": 0.25,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
@@ -80,14 +80,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.0,
-    "rotation": -60.068
+    "velocity": 2.0,
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": "Top Half trench",
   "idealStartingState": {
-    "velocity": 2.0,
-    "rotation": 0.0
+    "velocity": 0.0,
+    "rotation": -60.068
   },
   "useDefaultConstraints": true
 }

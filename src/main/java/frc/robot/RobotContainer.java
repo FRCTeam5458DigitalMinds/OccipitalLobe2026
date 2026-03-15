@@ -105,29 +105,16 @@ public class RobotContainer {
             Commands.parallel(
                 //Part 1
                 //Two parts: run shooter and run hood depending on where the robot is facing
-                Commands.parallel(
-                    //run shooter based on distance
-                    //m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()),
-                    m_Shooter.PIDrunMotors(25.5),
-                    new ConditionalCommand(
-                        //On true, ferry mode
-                        m_Hood.toSetpoint(1),
-                        //On false, hub mode
-                        //m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
-                        m_Hood.run(() -> {m_Hood.getPosition();}),
-                        //Conditional: check if robot is facing drivers
-                        drivetrain::facingDriver
-                    )
-                ),
+                mainShoot(),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
-                Commands.waitSeconds(0.25)
+                Commands.waitSeconds(0.5)
                 .andThen(
                     //Two parts: index & feeder
                     //run both feeder and indexer
                     Commands.parallel(
                         m_Feeder.setSpeed(90),
-                        m_Indexer.setSpeed(90)
+                        m_Indexer.unjam().repeatedly().finallyDo(() -> {m_Intake.toSetpoint(1);})
                     )
                 )
             )
@@ -153,7 +140,7 @@ public class RobotContainer {
 
         NamedCommands.registerCommand(
             "Oscillate", 
-            m_Intake.slowRetract().until(m_Intake::atEnd)
+            m_Intake.slowRetract().until(m_Intake::AutoatEnd)
             /*Commands.repeatingSequence(
                 m_Intake.extendIntake()
                 .andThen(Commands.waitSeconds(0.7))
@@ -278,43 +265,13 @@ public class RobotContainer {
             Commands.parallel(
                 //Part 1
                 //Two parts: run shooter and run hood depending on where the robot is facing
-                Commands.parallel(
-                    //run shooter based on distance
-                    new ConditionalCommand(
-                        //On true, ferry mode
-                        m_Shooter.PIDrunMotors(25.5), //Will change
-                        //On false, hub mode
-                        m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag())
-                        .andThen(new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate)),
-                        //Conditional: check if robot is facing drivers
-                        drivetrain::facingDriver
-                    )
-                    ,
-                    new ConditionalCommand(
-                        //On true, ferry mode
-                        m_Hood.toSetpoint(1),
-                        //On false, hub mode
-                        //m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
-                        m_Hood.run(() -> {m_Hood.getPosition();}),
-                        //Conditional: check if robot is facing drivers
-                        drivetrain::facingDriver
-                    )
-                ),
+                mainShoot(),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
                 Commands.waitSeconds(1)
                 .andThen(
                     //Two parts: index & feeder and intake
-                    Commands.parallel(
-                        //run both feeder and indexer
-                        Commands.parallel(
-                            m_Feeder.setSpeed(90),
-                            m_Indexer.setSpeed(90)
-                        ),
-                        //
-                        Commands.waitSeconds(1).andThen(m_Intake.slowRetract().until(m_Intake::atEnd))
-
-                    )
+                    restOfShoot()
                 )
             )
         );
@@ -376,7 +333,7 @@ public class RobotContainer {
                 )
             )
             .andThen(m_Climber.toSetpoint(0))
-            ).withTimeout(2)
+            ).withTimeout(2.5)
         );
             /*Commands.sequence(
             m_Climber.toSetpoint(1)//.until(m_Climber::readytoClimb)
@@ -386,10 +343,7 @@ public class RobotContainer {
 
         joystick.povUp().whileTrue(
             m_Climber.toSetpoint(1)
-
         );
-
-
         joystick.povDown().whileTrue(
             m_Climber.toSetpoint(2)
 
@@ -441,17 +395,37 @@ public class RobotContainer {
                 //Add 1 Second delay of cmd group 2
                 Commands.waitSeconds(1)
                 .andThen(
-                    //Two parts: index & feeder
-                    //run both feeder and indexer
-                    Commands.parallel(
-                        m_Feeder.setSpeed(90),
-                        m_Indexer.setSpeed(90),
-                        Commands.waitSeconds(1).andThen(m_Intake.slowRetract().until(m_Intake::atEnd))
-                    )
+                    restOfShoot()
                 )
             )
         );
     }
+//run shooter based on distance
+    public Command mainShoot(){
+        return new ConditionalCommand(
+                //On true, ferry mode
+                m_Shooter.PIDrunMotors(25.5).alongWith(m_Hood.toSetpoint(1)), //Will change
+                //On false, hub mode
+                m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()).alongWith(m_Hood.run(() -> {m_Hood.getPosition();}))//m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
+                .andThen(new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate)),
+                //Conditional: check if robot is facing drivers
+                drivetrain::facingDriver
+            );
+    }
+    
+    //Two parts: index & feeder
+    //run both feeder and indexer
+   public Command restOfShoot(){
+        return Commands.parallel(
+            m_Feeder.setSpeed(90),
+            m_Indexer.setSpeed(80),
+            m_Roller.setSpeed(80),
+            Commands.waitSeconds(1.5)
+                .andThen(
+                    m_Intake.slowRetract().until(m_Intake::atEnd)
+                )
+        );
+   }
 
     
     public Command getAutonomousCommand() {

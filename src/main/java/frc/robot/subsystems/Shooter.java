@@ -47,6 +47,8 @@ public class Shooter extends SubsystemBase {
 
     InterpolatingDoubleTreeMap shooterRPS;
     InterpolatingDoubleTreeMap NewshooterRPS;
+    InterpolatingDoubleTreeMap NewershooterRPS;
+
 
 
     /*Notes:
@@ -120,6 +122,7 @@ public class Shooter extends SubsystemBase {
         shooterRPS.put(2.5236079021737163,35.0);
         shooterRPS.put(4.226945331446267,40.0);
 
+        //Attempt #2
         NewshooterRPS = new InterpolatingDoubleTreeMap();
         
         NewshooterRPS.put(2.5055061242497207,34.0);
@@ -128,7 +131,15 @@ public class Shooter extends SubsystemBase {
         NewshooterRPS.put(3.2319892011747924,36.0);
         NewshooterRPS.put(1.1445679370483035,25.73);
         //test later
-        
+
+        NewershooterRPS = new InterpolatingDoubleTreeMap();
+        //With new silicon wrapping
+        NewershooterRPS.put(1.7826957092277889,25.99); //Auto Position
+        NewershooterRPS.put(2.6796049640760677,28.0); // next to tower
+        NewershooterRPS.put(1.6360094234791194,29.0); // 
+        NewershooterRPS.put(3.2319892011747924,36.0); //
+        NewershooterRPS.put(1.1445679370483035,25.73); //
+
         //After Week 3 feature
         m_sysIdRoutine = new SysIdRoutine(
               new SysIdRoutine.Config(
