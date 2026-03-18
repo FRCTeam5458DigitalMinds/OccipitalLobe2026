@@ -179,7 +179,7 @@ public class Limelight extends SubsystemBase{
       SmartDashboard.putNumber("Dist to Robot", distance - halfofBumper);
       
       //Distance from tag to front of bumper
-      return distance - halfofBumper;
+      return distance;
    }
 
    
@@ -273,7 +273,7 @@ public class Limelight extends SubsystemBase{
   }
   
   public boolean isCentered(){
-    double txnc = 99; //Assumes not centered if no tag
+    /*double txnc = 99; //Assumes not centered if no tag
     RawFiducial[] crtFiducials = getFiducialData();
 
     //moves raw fiducial to current target ids, takes only tx of the current target id    
@@ -282,10 +282,10 @@ public class Limelight extends SubsystemBase{
         if (fiducial.id == priorityTag()){
             txnc = fiducial.txnc; // X offset (no crosshair)
         }
-    }
+    }*/
 
     //If txnc is between these numbers, robot is aiming at the hub
-    if (-14 < txnc && txnc < 9){ //-23 & -30
+    if (-10 < SmartDashboard.getNumber("TXNC", 99) && SmartDashboard.getNumber("TXNC", 99) < -5){ //-23 & -30
         return true;
     }
     

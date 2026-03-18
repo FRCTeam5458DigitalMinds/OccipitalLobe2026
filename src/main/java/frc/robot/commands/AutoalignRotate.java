@@ -35,55 +35,19 @@ public class AutoalignRotate extends Command {
     //puts the Target ID on the Dashboard
     public void initialize()
     {   
+        DRIVETRAIN.setControl(
+            robotDrive.withRotationalRate(0)
+                      .withVelocityX(0)
+                      .withVelocityY(0)
+        );
         SmartDashboard.putNumber("ID", LIMELIGHT.getTargetID());
-        
     }
 
     //runs 
     public void execute()
     {
-        
-        boolean isCentered = false;
-        int crtTargetID = 0;
         double currentTXNC = 0.0;
-
-        
-        RawFiducial[] currentFiducials = LIMELIGHT.getFiducialData(); //this is the raw data from the limelight
-        List<Integer> alCurrentTargetsIDs = new ArrayList<>(); //sets up list of IDs for the field
-
-        for (RawFiducial fiducial : currentFiducials) {//moves raw fiducial ids to target ids
-
-            alCurrentTargetsIDs.add(fiducial.id);
-        }
-
-        //groups tags & picks a tag
-        if (alCurrentTargetsIDs.contains(5) && alCurrentTargetsIDs.contains(8) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
-            crtTargetID = 9;
-        }
-        else if (alCurrentTargetsIDs.contains(2) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11)){
-            crtTargetID = 11;
-        }
-        else if (alCurrentTargetsIDs.contains(8) && alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
-            crtTargetID = 9;
-        }
-        else if (alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11) && alCurrentTargetsIDs.contains(2)){
-            crtTargetID = 11;
-        }
-        else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10) && alCurrentTargetsIDs.contains(11)){
-            crtTargetID = 10;
-        }
-        else if (alCurrentTargetsIDs.contains(9) && alCurrentTargetsIDs.contains(10)){
-            crtTargetID = 10;
-        }
-        else if (alCurrentTargetsIDs.contains(11) && alCurrentTargetsIDs.contains(2)){
-            crtTargetID = 11;
-        }
-        else if (alCurrentTargetsIDs.contains(10)){
-            crtTargetID = 10;
-        }
-
-//gets tx from target id, autoaligns, keeps looping until tx centered
-        do{
+        //gets tx from target id, autoaligns, keeps looping until tx centered
 
             //gets raw fiducial (again)
         
@@ -92,43 +56,29 @@ public class AutoalignRotate extends Command {
       //moves raw fiducial to current target ids, takes only tx of the current target id    
             for (RawFiducial fiducial : crtFiducials) {
 
-                if (fiducial.id == crtTargetID){
+                if (fiducial.id == LIMELIGHT.priorityTag()){
                     currentTXNC = fiducial.txnc; // X offset (no crosshair)
                 }
             }
 
-            if (crtTargetID != 0){
+            if (LIMELIGHT.priorityTag() != 0){
 
                     //Runs function to get turn speed
                     double turnSpeed = LIMELIGHT.limelight_aim_proportional(maxAnglSpeed,currentTXNC);
-
-
                     SmartDashboard.putNumber("TXNC", currentTXNC);
 
                     //Uses turn speed to run robot
                     DRIVETRAIN.setControl(robotDrive.withRotationalRate(turnSpeed));
 
-                    //If crosshair is between these horizontal values , stop
-                    if (-14 < currentTXNC && currentTXNC < 9){ //-23 & -30
-                        isCentered = true;
-                    }
-
             }
             else {
-
-                //End loop in case no tag seen
-                isCentered = true;
+                isFinished();
             }
 
-        } while (isCentered == false); //stop when tag is centered
-
         //runs "isFinished" function to say how it is done
-        isFinished();
     }
 
-
-    //sets boolean for its done to stop the comand
-    public boolean isFinished(){
-      return true;
+    public void end(boolean interupted){
+        DRIVETRAIN.setControl(robotDrive.withRotationalRate(0));
     }
 }

@@ -88,9 +88,17 @@ public class RobotContainer {
 
         limelightPipelineChooser = new SendableChooser<>();
 
-        limelightPipelineChooser.setDefaultOption("Day", 0);
-        limelightPipelineChooser.addOption("Night", 1);
-        limelightPipelineChooser.addOption("Comp", 2);
+
+        //Foward 0.06 Right 0.249 Up 0.461 Pitch 25
+        limelightPipelineChooser.setDefaultOption("Shop Day", 0);
+        limelightPipelineChooser.addOption("Shop Night", 1);
+        limelightPipelineChooser.addOption("Davis", 2);
+        limelightPipelineChooser.addOption("Calibrate", 3);
+        limelightPipelineChooser.addOption("Sac", 4);
+        //limelightPipelineChooser.addOption("Contra", 5);
+
+
+
 
         SmartDashboard.putData("Pipeline Chooser", limelightPipelineChooser);
 
@@ -285,7 +293,7 @@ public class RobotContainer {
                 () -> {m_Intake.setIntake(0);}
             )
         );
-
+                /*
         //Test hood
         joystick.a().whileTrue(
             m_Hood.runEnd(
@@ -309,7 +317,7 @@ public class RobotContainer {
             m_Climber.toSetpoint(0)
 
         );
-
+                */
         joystick.povRight().and(joystick.b()).onTrue(
             Commands.sequence(
                 m_Climber.toSetpoint(1).until(m_Climber::readytoRest)
@@ -386,8 +394,8 @@ public class RobotContainer {
         return m_Shooter.PIDrunMotors(25.5).alongWith(m_Hood.toSetpoint(1));
     }
     public Command hubShoot(){
-        return m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()).alongWith(m_Hood.run(() -> {m_Hood.getPosition();}))//m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
-                .andThen(new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate))
+        return new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate).until(m_Limelight::isCentered).withTimeout(0.5)
+                    .andThen(m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()).alongWith(m_Hood.run(() -> {m_Hood.getPosition();})))
             ;
     }
 //run shooter based on distance
