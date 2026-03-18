@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.560328102710413,
-        "y": 6.072838801711842
+        "x": 3.508573466476462,
+        "y": 6.111654778887304
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.5655071356842125,
-        "y": 6.145095856489893
+        "x": 2.527757078037499,
+        "y": 6.055387176710639
       },
       "isLocked": false,
       "linkedName": "Top Depot"
@@ -20,8 +20,8 @@
         "y": 6.072838801711842
       },
       "prevControl": {
-        "x": 1.4972695411266477,
-        "y": 6.0746049801128645
+        "x": 1.3913478779998816,
+        "y": 6.150564709495103
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,30 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "180 Flip",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "180 Flip"
+        }
+      }
+    },
+    {
+      "name": "Deploy Intake",
+      "waypointRelativePos": 0.5293720459149203,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Deploy Intake"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 2.5,
     "maxAcceleration": 2.0,
@@ -48,7 +71,7 @@
   "folder": "Starting points",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

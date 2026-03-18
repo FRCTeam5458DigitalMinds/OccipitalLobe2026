@@ -352,7 +352,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     {
         resetPose(getPose());
     }
-
+    public void testRestPose(Pose2d startingPose)
+    {
+        resetPose(startingPose);
+    }
         //Updates the position of the robot
     public void updateOdometry() {
 
@@ -392,10 +395,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private void configureAutoBuilder() {
         try {
             
-            var config = RobotConfig.fromGUISettings();
+            RobotConfig config = RobotConfig.fromGUISettings();
             AutoBuilder.configure(
                 () -> getPose(),   // Supplier of current robot pose
-                this::resetPose,         // Consumer for seeding pose against auto
+                this::testRestPose,         // Consumer for seeding pose against auto
                 () -> getState().Speeds, // Supplier of current robot speeds
                 // Consumer of ChassisSpeeds and feedforwards to drive the robot
                 (speeds, feedforwards) -> setControl(

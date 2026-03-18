@@ -115,12 +115,12 @@ public class Shooter extends SubsystemBase {
         //Value: velocity of shooter
 
         //Will change
-        // Old Numbers as of 3/7/2026
-        shooterRPS.put(0.8732327907316006,24.0);        
-        shooterRPS.put(1.1529219342235464,26.0);
-        shooterRPS.put(1.8059915426872029,32.0);
-        shooterRPS.put(2.5236079021737163,35.0);
-        shooterRPS.put(4.226945331446267,40.0);
+        // new Numbers as of 3/16/2026
+        shooterRPS.put(1.9266899545847438,25.42); //Front of tower      
+        shooterRPS.put(1.9823946179552907,25.73); //Mid right
+        shooterRPS.put(2.661263186996523,28.6); //Corner
+        shooterRPS.put(2.2590145219495,28.4); //Near Left Trench
+        shooterRPS.put(2.157440140835241,27.5);//Near Right Trench
 
         //Attempt #2
         NewshooterRPS = new InterpolatingDoubleTreeMap();
@@ -134,11 +134,13 @@ public class Shooter extends SubsystemBase {
 
         NewershooterRPS = new InterpolatingDoubleTreeMap();
         //With new silicon wrapping
-        NewershooterRPS.put(1.7826957092277889,25.99); //Auto Position
-        NewershooterRPS.put(2.6796049640760677,28.0); // next to tower
-        NewershooterRPS.put(1.6360094234791194,29.0); // 
-        NewershooterRPS.put(3.2319892011747924,36.0); //
-        NewershooterRPS.put(1.1445679370483035,25.73); //
+        NewershooterRPS.put(1.926470572923554,25.99); //Auto Position
+        NewershooterRPS.put(2.4573944066702516,27.3); // next to tower
+        NewershooterRPS.put(3.026646586664895,31.04); // front of depot
+        NewershooterRPS.put(3.428045861139117,34.01); // Corner (rough max)
+
+        //NewershooterRPS.put(1.1445679370483035,25.73); //
+
 
         //After Week 3 feature
         m_sysIdRoutine = new SysIdRoutine(
@@ -207,7 +209,7 @@ public class Shooter extends SubsystemBase {
     public Command PIDtreeRunMotors(double distance){
       return run(
           () -> {
-            setTargetRPS(NewshooterRPS.get(distance));
+            setTargetRPS(shooterRPS.get(distance));
           }
       );
     }

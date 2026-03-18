@@ -105,17 +105,14 @@ public class RobotContainer {
             Commands.parallel(
                 //Part 1
                 //Two parts: run shooter and run hood depending on where the robot is facing
-                mainShoot(),
+                hubShoot(),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
-                Commands.waitSeconds(0.5)
+                Commands.waitSeconds(1)
                 .andThen(
                     //Two parts: index & feeder
                     //run both feeder and indexer
-                    Commands.parallel(
-                        m_Feeder.setSpeed(90),
-                        m_Indexer.unjam().repeatedly().finallyDo(() -> {m_Intake.toSetpoint(1);})
-                    )
+                    restOfShoot()
                 )
             )
         );
@@ -136,17 +133,6 @@ public class RobotContainer {
         NamedCommands.registerCommand(
             "Retract Intake", 
             m_Intake.runOnce(() -> {m_Intake.toSetpoint(1);})
-        );
-
-        NamedCommands.registerCommand(
-            "Oscillate", 
-            m_Intake.slowRetract().until(m_Intake::AutoatEnd)
-            /*Commands.repeatingSequence(
-                m_Intake.extendIntake()
-                .andThen(Commands.waitSeconds(0.7))
-                .andThen(m_Intake.retractIntake())
-                .andThen(Commands.waitSeconds(0.7))
-            )*/
         );
 
         //Stop everything
@@ -180,6 +166,11 @@ public class RobotContainer {
             "Auto Rotate", 
             new AutoalignRotate(m_Limelight, drivetrain, MaxAngularRate)
         );
+        NamedCommands.registerCommand(
+            "180 flip", 
+            drivetrain.runOnce(drivetrain::seedFieldCentric)
+        );
+
 
         NamedCommands.registerCommand("Move to Depot", drivetrain.pathfind_test("Move to Depot"));
         NamedCommands.registerCommand("neutral zone", drivetrain.pathfind_test("neutral zone"));
@@ -265,7 +256,7 @@ public class RobotContainer {
             Commands.parallel(
                 //Part 1
                 //Two parts: run shooter and run hood depending on where the robot is facing
-                mainShoot(),
+                hubShoot(),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
                 Commands.waitSeconds(1)
@@ -380,16 +371,7 @@ public class RobotContainer {
                 //Two parts: run shooter and run hood depending on where the robot is facing
                 Commands.parallel(
                     //run shooter based on distance
-                    m_Shooter.PIDtestRunMotors(),
-                    new ConditionalCommand(
-                        //On true, ferry mode
-                        m_Hood.toSetpoint(1),
-                        //On false, hub mode
-                        //m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
-                        m_Hood.run(() -> {m_Hood.getPosition();}),
-                        //Conditional: check if robot is facing drivers
-                        drivetrain::facingDriver
-                    )
+                    ferryShoot()
                 ),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
@@ -399,6 +381,14 @@ public class RobotContainer {
                 )
             )
         );
+    }
+    public Command ferryShoot(){
+        return m_Shooter.PIDrunMotors(25.5).alongWith(m_Hood.toSetpoint(1));
+    }
+    public Command hubShoot(){
+        return m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()).alongWith(m_Hood.run(() -> {m_Hood.getPosition();}))//m_Hood.run(() -> {m_Hood.goToPostion(m_Limelight.getDistToNearestTag());})
+                .andThen(new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate))
+            ;
     }
 //run shooter based on distance
     public Command mainShoot(){
@@ -422,7 +412,13 @@ public class RobotContainer {
             m_Roller.setSpeed(80),
             Commands.waitSeconds(1.5)
                 .andThen(
-                    m_Intake.slowRetract().until(m_Intake::atEnd)
+                     Commands.repeatingSequence(
+                        m_Intake.retractIntake()
+                        .andThen(Commands.waitSeconds(0.5))
+                        .andThen(m_Intake.extendIntake())
+                        .andThen(Commands.waitSeconds(0.5))
+                    )
+                    //m_Intake.slowRetract().until(m_Intake::atEnd)
                 )
         );
    }

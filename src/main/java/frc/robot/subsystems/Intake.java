@@ -94,14 +94,14 @@ public class Intake extends SubsystemBase {
     //Moves in based on current position
     public Command retractIntake(){
       return runOnce(
-        () -> {customPosition(getPosition()-10);}
+        () -> {customPosition(getPosition()-5);}
       );
     }
 
     //Moves out based on current position
     public Command extendIntake(){
       return runOnce(
-        () -> {customPosition(getPosition()+10);}
+        () -> {customPosition(getPosition()+5);}
       );
     }
     public Command SlowretractIntake(){

@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.560328102710413,
-        "y": 6.072838801711842
+        "x": 3.508573466476462,
+        "y": 6.111654778887304
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.5655071356842125,
-        "y": 6.145095856489893
+        "x": 2.513752499450262,
+        "y": 6.183911833665355
       },
       "isLocked": false,
       "linkedName": "Top Depot"
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

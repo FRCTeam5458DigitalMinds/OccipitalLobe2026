@@ -23,12 +23,6 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Oscillate"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
                   "name": "Main Shoot"
                 }
               },
