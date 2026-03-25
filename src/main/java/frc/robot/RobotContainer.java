@@ -293,6 +293,10 @@ public class RobotContainer {
                 () -> {m_Intake.setIntake(0);}
             )
         );
+
+        joystick.y().whileTrue(
+            m_Indexer.setSpeed(-45)
+        );
                 /*
         //Test hood
         joystick.a().whileTrue(
@@ -310,16 +314,16 @@ public class RobotContainer {
                 () -> {m_Hood.setHood(0);}
             )
         );
-
-        //Run climb
-
+    */
+        //Run climb     
         joystick.povLeft().whileTrue(
             m_Climber.toSetpoint(0)
-
         );
-                */
+                
         joystick.povRight().and(joystick.b()).onTrue(
-            Commands.sequence(
+            m_Climber.toSetpoint(1).until(m_Climber::readytoRest)
+
+            /*Commands.sequence(
                 m_Climber.toSetpoint(1).until(m_Climber::readytoRest)
             .andThen(
                 drivetrain.runOnce(
@@ -332,12 +336,12 @@ public class RobotContainer {
                 )
             )
             .andThen(m_Climber.toSetpoint(0))
-            ).withTimeout(2.5)
+            ).withTimeout(2.5)*/
         );
             /*Commands.sequence(
             m_Climber.toSetpoint(1)//.until(m_Climber::readytoClimb)
             .andThen(Commands.waitSeconds(0.25))
-            .andThen(m_Climber.toSetpoint(2))
+            //.andThen(m_Climber.toSetpoint(2))
             )*/
 
         joystick.povUp().whileTrue(
@@ -350,16 +354,25 @@ public class RobotContainer {
             //new unclimb(drivetrain, m_Climber)
         );
 
+
         //work on later (Better shooter PID stuff)
 
         /* Joystick B = Quasistatic forward
-        Joystick X = Quasistatic reverse
+        Joystick X = Quasistatic reverse */
 
         joystick.b().whileTrue(
-            m_Shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+            Commands.parallel(
+                m_Shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
+                m_Feeder.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
+                m_Indexer.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+            )
         );
         joystick.x().whileTrue(
-            m_Shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+            Commands.parallel(
+                m_Shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse),
+                m_Feeder.sysIdQuasistatic(SysIdRoutine.Direction.kReverse),
+                m_Indexer.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+            )        
         );
 
         //Testing purposes
@@ -373,7 +386,9 @@ public class RobotContainer {
         /* */
         //Testing purposes
         //test shooter rps
-        joystick.rightBumper().whileTrue(
+
+        //Ferry Mode
+        /*joystick.rightBumper().whileTrue(
             Commands.parallel(
                 //Part 1
                 //Two parts: run shooter and run hood depending on where the robot is facing
@@ -388,6 +403,23 @@ public class RobotContainer {
                     restOfShoot()
                 )
             )
+        );*/
+        //Test
+        joystick.rightBumper().whileTrue(
+            Commands.parallel(
+                //Part 1
+                //Two parts: run shooter and run hood depending on where the robot is facing
+                Commands.parallel(
+                    //run shooter based on distance
+                    testShoot()
+                ),
+                //Part 2
+                //Add 1 Second delay of cmd group 2
+                Commands.waitSeconds(1)
+                .andThen(
+                    BBrestOfShoot()
+                )
+            )
         );
     }
     public Command ferryShoot(){
@@ -397,6 +429,12 @@ public class RobotContainer {
         return new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate).until(m_Limelight::isCentered).withTimeout(0.5)
                     .andThen(m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()).alongWith(m_Hood.run(() -> {m_Hood.getPosition();})))
             ;
+    }
+
+    //Experimental shooting stuff
+    public Command testShoot(){
+        return m_Shooter.BBtestMotors();
+
     }
 //run shooter based on distance
     public Command mainShoot(){
@@ -417,6 +455,24 @@ public class RobotContainer {
         return Commands.parallel(
             m_Feeder.setSpeed(90),
             m_Indexer.setSpeed(80),
+            m_Roller.setSpeed(80),
+            Commands.waitSeconds(1.5)
+                .andThen(
+                     Commands.repeatingSequence(
+                        m_Intake.retractIntake()
+                        .andThen(Commands.waitSeconds(0.5))
+                        .andThen(m_Intake.extendIntake())
+                        .andThen(Commands.waitSeconds(0.5))
+                    )
+                    //m_Intake.slowRetract().until(m_Intake::atEnd)
+                )
+        );
+   }
+
+   public Command BBrestOfShoot(){
+        return Commands.parallel(
+            m_Feeder.BBtestMotors(),
+            m_Indexer.BBtestMotors(),
             m_Roller.setSpeed(80),
             Commands.waitSeconds(1.5)
                 .andThen(

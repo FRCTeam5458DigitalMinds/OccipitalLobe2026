@@ -4,19 +4,37 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
+
+import static edu.wpi.first.units.Units.Volt;
+
 
 public class Indexer extends SubsystemBase {
 
     //Initializes the Indexer Motor
     TalonFX indexerMotor;
+
+    private BangBangController controller = new BangBangController();
+
+    Double testRPS;
+
+    private final SysIdRoutine m_sysIdRoutine;
+    private final VoltageOut m_voltReq = new VoltageOut(0.0);
+
+
+
 
     public Indexer() {
 
@@ -28,7 +46,35 @@ public class Indexer extends SubsystemBase {
 
         indexerMotor.getConfigurator().apply(indexerConfigs);
 
+        indexerMotor.setNeutralMode(NeutralModeValue.Coast); 
+
+        SmartDashboard.putNumber("Index Test RPS", 76);
+
+        //After Week 3 feature
+        m_sysIdRoutine = new SysIdRoutine(
+              new SysIdRoutine.Config(
+         null,        // Use default ramp rate (1 V/s)
+                  Volt.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
+          null,        // Use default timeout (10 s)
+                      // Log state with Phoenix SignalLogger class
+         (state) -> SignalLogger.writeString("Index state", state.toString())
+        ),
+          new SysIdRoutine.Mechanism(
+          (volts) -> indexerMotor.setControl(m_voltReq.withOutput(volts.in(Volt))),
+          null,
+          this
+        )
+      );
+
     }
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+      return m_sysIdRoutine.quasistatic(direction);
+    }
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+      return m_sysIdRoutine.dynamic(direction);
+    }
+
 
     //Sets the speed for the Indexer Motor
     public Command setSpeed(double OutputPercent){
@@ -37,6 +83,18 @@ public class Indexer extends SubsystemBase {
                 setIndexer(OutputPercent);
             }
         );
+    }
+    //Just Bang Bang
+    public Command BBtestMotors(){
+      return run(
+        () -> {
+          BBrps(testRPS);
+        }
+      );
+    } 
+
+    public void BBrps(double RPS){
+        indexerMotor.set(controller.calculate(indexerMotor.getVelocity().getValueAsDouble(), RPS));
     }
 
     //Sets the speed of the Indexer Motor
@@ -53,4 +111,10 @@ public class Indexer extends SubsystemBase {
             .andThen(Commands.waitSeconds(0.25))
             ;
     }
+     //Continuously runs
+    @Override
+    public void periodic() {
+      testRPS = SmartDashboard.getNumber("Index Test RPS", 76);
+      SmartDashboard.putNumber("Index RPS", indexerMotor.getVelocity().getValueAsDouble());
+    } 
 }

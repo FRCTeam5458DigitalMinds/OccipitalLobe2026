@@ -13,7 +13,9 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -45,11 +47,13 @@ public class Shooter extends SubsystemBase {
     //Calculates the max Revolutions Per Second
     private final double maxRPM = 5500;
 
+
+    BangBangController controller = new BangBangController();
+
     InterpolatingDoubleTreeMap shooterRPS;
     InterpolatingDoubleTreeMap NewshooterRPS;
     InterpolatingDoubleTreeMap NewershooterRPS;
-
-
+    
 
     /*Notes:
     10%: 550
@@ -101,6 +105,8 @@ public class Shooter extends SubsystemBase {
 
         upperFlyMotor.setControl(new Follower(lowerFlyMotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
+        lowerFlyMotor.setNeutralMode(NeutralModeValue.Coast);
+        upperFlyMotor.setNeutralMode(NeutralModeValue.Coast);
 
 
         /* 
@@ -149,7 +155,7 @@ public class Shooter extends SubsystemBase {
                   Volt.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
           null,        // Use default timeout (10 s)
                       // Log state with Phoenix SignalLogger class
-         (state) -> SignalLogger.writeString("state", state.toString())
+         (state) -> SignalLogger.writeString("Shooter state", state.toString())
         ),
           new SysIdRoutine.Mechanism(
           (volts) -> lowerFlyMotor.setControl(m_voltReq.withOutput(volts.in(Volt))),
@@ -158,7 +164,7 @@ public class Shooter extends SubsystemBase {
         )
       );
 
-      SmartDashboard.putNumber("Test RPS", 30);
+      SmartDashboard.putNumber("Shooter Test RPS", 30);
         
     }
 
@@ -213,14 +219,25 @@ public class Shooter extends SubsystemBase {
           }
       );
     }
-    public Command PIDtestRunMotors(){
+    /*public Command PIDtestRunMotors(){
       return run(
           () -> {
             setTargetRPS(testRPS);
           }
       );
+    }*/
+    //Just Bang Bang
+    public Command BBtestMotors(){
+      return run(
+        () -> {
+          BBrps(testRPS);
+        }
+      );
     }
 
+    public void BBrps(double RPS){
+        lowerFlyMotor.set(controller.calculate(lowerFlyMotor.getVelocity().getValueAsDouble(), RPS));
+    }
 
     public void setTargetRPS(double RPS){
       SmartDashboard.putNumber("RPS", lowerFlyMotor.getVelocity().getValueAsDouble());
@@ -228,13 +245,20 @@ public class Shooter extends SubsystemBase {
     }
     //After week 3 feature
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-   return m_sysIdRoutine.quasistatic(direction);
+      return m_sysIdRoutine.quasistatic(direction);
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+      return m_sysIdRoutine.dynamic(direction);
     }
 
     //Continuously runs
    @Override
    public void periodic() {
-    testRPS = SmartDashboard.getNumber("Test RPS", 30);
+    testRPS = SmartDashboard.getNumber("Shooter Test RPS", 30);
+    SmartDashboard.putNumber("Shooter RPS", lowerFlyMotor.getVelocity().getValueAsDouble());
+
+
   }
 
 }

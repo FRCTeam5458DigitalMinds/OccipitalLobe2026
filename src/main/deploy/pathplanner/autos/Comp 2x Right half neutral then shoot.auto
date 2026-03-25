@@ -48,7 +48,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 6.5
+                  "waitTime": 6.0
                 }
               }
             ]
@@ -61,9 +61,15 @@
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "Closer Bottom Half of neutral zone"
+            "pathName": "hub to Bottom trench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Closer Bottom Half of neutral zone"
           }
         },
         {
@@ -138,7 +144,7 @@
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }

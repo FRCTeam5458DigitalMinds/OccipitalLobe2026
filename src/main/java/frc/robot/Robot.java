@@ -44,6 +44,8 @@ public class Robot extends TimedRobot {
     
     @Override
     public void robotInit() {
+        SmartDashboard.putBoolean("Is Hub active?", false);
+
         PathfindingCommand.warmupCommand().schedule();
                 
     }

@@ -297,14 +297,12 @@ public class Limelight extends SubsystemBase{
   //Note: if this doesn't work, make two comp pipelines for just red or blue tags
   public void setPriorityTags(){
     if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red){
-        for (int tag : redTags){
-            LimelightHelpers.setPriorityTagID(dmllName, tag);
-        }
+        LimelightHelpers.SetFiducialIDFiltersOverride(dmllName, redTags);
     }
     else{
-        for (int tag : blueTags){
-            LimelightHelpers.setPriorityTagID(dmllName, tag);
-        }
+
+        LimelightHelpers.SetFiducialIDFiltersOverride(dmllName, blueTags);
+
     }
   }
   @Override

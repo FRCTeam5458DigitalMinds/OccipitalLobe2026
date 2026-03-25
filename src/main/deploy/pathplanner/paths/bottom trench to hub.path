@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.228497411301426,
-        "y": 0.6225174219581423
+        "x": 4.223204815771854,
+        "y": 0.6912298489202721
       },
       "isLocked": false,
       "linkedName": "Bottom Trench"
@@ -20,12 +20,12 @@
         "y": 0.9232524964336677
       },
       "prevControl": {
-        "x": 3.5341232684630928,
-        "y": 0.5229114847914342
+        "x": 3.4276915031002,
+        "y": 0.5951461455689357
       },
       "nextControl": {
-        "x": 3.141666231027575,
-        "y": 1.1984834165360754
+        "x": 3.0830176823555004,
+        "y": 1.4917113462816438
       },
       "isLocked": false,
       "linkedName": null
@@ -36,15 +36,20 @@
         "y": 1.8807132667617692
       },
       "prevControl": {
-        "x": 3.235231570122662,
-        "y": 1.639671334607454
+        "x": 3.1819307469186437,
+        "y": 1.6118022344442007
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [
     {
@@ -53,8 +58,8 @@
         "y": 3.8
       },
       "rotationOffset": 0.0,
-      "minWaypointRelativePos": 1.35,
-      "maxWaypointRelativePos": 1.5,
+      "minWaypointRelativePos": 1.7987846049966176,
+      "maxWaypointRelativePos": 2.0,
       "name": "point toward the hub"
     }
   ],
