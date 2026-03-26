@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -19,6 +20,8 @@ public class PoseAutoAlign extends Command {
 
 
     Double maxAnglSpeed; //Max Angular Speed
+
+    Translation2d hubPose = new Translation2d();
 
     public PoseAutoAlign(CommandSwerveDrivetrain drivetrain, Double maxAngularSpeed) 
     {

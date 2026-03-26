@@ -52,6 +52,7 @@ public class RobotContainer {
 
     private final CommandXboxController joystick = new CommandXboxController(0);
 
+    //Set up subsystems
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public final Climber m_Climber = new Climber();
@@ -72,9 +73,8 @@ public class RobotContainer {
 
     public final Shooter m_Shooter = new Shooter();
 
-    
+    //Set up choosers
     private final SendableChooser<Command> autoChooser2;
-
     private final SendableChooser<Integer> limelightPipelineChooser;
 
 
@@ -88,7 +88,6 @@ public class RobotContainer {
 
         limelightPipelineChooser = new SendableChooser<>();
 
-
         //Foward 0.06 Right 0.249 Up 0.461 Pitch 25
         limelightPipelineChooser.setDefaultOption("Shop Day", 0);
         limelightPipelineChooser.addOption("Shop Night", 1);
@@ -96,9 +95,6 @@ public class RobotContainer {
         limelightPipelineChooser.addOption("Calibrate", 3);
         limelightPipelineChooser.addOption("Sac", 4);
         //limelightPipelineChooser.addOption("Contra", 5);
-
-
-
 
         SmartDashboard.putData("Pipeline Chooser", limelightPipelineChooser);
 
@@ -156,6 +152,7 @@ public class RobotContainer {
             ).withTimeout(0.1)
         );
 
+        //Raise climber
         NamedCommands.registerCommand("Setup Climb", 
             m_Climber.toSetpoint(1)
         );
@@ -165,18 +162,18 @@ public class RobotContainer {
             Commands.none()
         );
 
-        //Other commands
-        NamedCommands.registerCommand(
-            "Pose", 
-            drivetrain.runOnce(()-> drivetrain.resetPoseEstimator())
-        );
+        //Auto align
         NamedCommands.registerCommand(
             "Auto Rotate", 
             new AutoalignRotate(m_Limelight, drivetrain, MaxAngularRate)
         );
+
+        //Checks alliance and flips
         NamedCommands.registerCommand(
             "180 flip", 
-            drivetrain.runOnce(drivetrain::seedFieldCentric)
+            drivetrain.runOnce(
+                () -> {drivetrain.checkPerspective();}
+            )
         );
 
 

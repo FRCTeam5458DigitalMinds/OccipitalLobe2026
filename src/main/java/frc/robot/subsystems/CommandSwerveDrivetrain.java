@@ -26,9 +26,11 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -348,20 +350,44 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return getState().Pose;
     }
     //Reset pose
-    public void resetPoseEstimator()
-    {
-        resetPose(getPose());
-    }
-    public void testRestPose(Pose2d startingPose)
+    public void ResetPose(Pose2d startingPose)
     {
         resetPose(startingPose);
     }
-        //Updates the position of the robot
+    
+    //Updates the position of the robot
     public void updateOdometry() {
 
-        //guesses where robot is on the field 
+        //setup where robot is on the field 
         m_field.setRobotPose(getPose());
 
+        //setup hub object in field
+        m_field.getObject("hub").setPose(setHub().getMeasureX() ,setHub().getMeasureY(), Rotation2d.kZero);
+        
+        //Def below
+        checkPerspective();
+        megatag2Setup();
+    }
+
+    public Translation2d setHub(){
+        Distance hubX;
+        Distance hubY = Inches.of(317.69/2);
+        if (DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Blue){
+            hubX = Inches.of(182.11);
+        }
+        else{
+            hubX = Inches.of(651.22-182.11);
+        }
+        return new Translation2d(hubX.in(Meters), hubY.in(Meters));
+    }
+
+    //Caluculte distance (in the works)
+    public double distToHub(){
+        return getPose().getTranslation().getDistance(setHub());
+    }
+
+    //Megatag2 section
+    private void megatag2Setup(){
         boolean doRejectUpdate = false;
 
         //sets up robot orientation based on tags
@@ -371,27 +397,45 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(Constants.LimelightConstants.ll_Name);
  
         //if robot doesn't see any tags or robot turns too fast, don't update pose
-        if(Math.abs(pigeon.getAngularVelocityZWorld().getValueAsDouble()) > 360) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
-            {
-                doRejectUpdate = true;
-            }
-
-        if(mt2.tagCount == 0)
-            {
-                doRejectUpdate = true;
-            }
+        if(Math.abs(pigeon.getAngularVelocityZWorld().getValueAsDouble()) > 360 || mt2.tagCount == 0){
+            doRejectUpdate = true;
+        }
 
         //updates position based on tag if nothings wrong 
-        if(!doRejectUpdate)
-            {
-                LimelightHelpers.SetRobotOrientation(Constants.LimelightConstants.ll_Name, getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-                setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,999999));
-                addVisionMeasurement(
-                    mt2.pose,
-                    mt2.timestampSeconds);
-            }
-        checkPerspective();
+        if(!doRejectUpdate){
+            LimelightHelpers.SetRobotOrientation(Constants.LimelightConstants.ll_Name, getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+            setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,999999));
+            addVisionMeasurement(
+                mt2.pose,
+                mt2.timestampSeconds);
+        }
     }
+
+    //Checks if robot is facing driver station
+    public boolean facingDriver(){
+        double yaw = Math.abs(pigeon.getYaw().getValueAsDouble()%360);
+        return (yaw > 320 || yaw < 40);
+    }
+    
+    //Prints Yaw on Dashboard
+    public void yawNum(){
+        SmartDashboard.putNumber("YAW", Math.abs(pigeon.getYaw().getValueAsDouble()%360));
+    }
+
+    //Check what alliance and flips
+    public void checkPerspective(){
+        DriverStation.getAlliance().ifPresent(allianceColor -> {
+                setOperatorPerspectiveForward(
+                    allianceColor == Alliance.Red
+                        ? kRedAlliancePerspectiveRotation
+                        : kBlueAlliancePerspectiveRotation
+                );
+                m_hasAppliedOperatorPerspective = true;
+            }
+        );
+    }
+
+    //Auto section
 
     private void configureAutoBuilder() {
         try {
@@ -399,7 +443,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             RobotConfig config = RobotConfig.fromGUISettings();
             AutoBuilder.configure(
                 () -> getPose(),   // Supplier of current robot pose
-                this::testRestPose,         // Consumer for seeding pose against auto
+                this::ResetPose,         // Consumer for seeding pose against auto
                 () -> getState().Speeds, // Supplier of current robot speeds
                 // Consumer of ChassisSpeeds and feedforwards to drive the robot
                 (speeds, feedforwards) -> setControl(
@@ -422,20 +466,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
         }
     }
-
-    
-    //Checks if robot is facing driver station
-    public boolean facingDriver(){
-        double yaw = Math.abs(pigeon.getYaw().getValueAsDouble()%360);
-        return (yaw > 320 || yaw < 40);
-    }
-    
-    //Prints Yaw on Dashboard
-    public void yawNum(){
-        SmartDashboard.putNumber("YAW", Math.abs(pigeon.getYaw().getValueAsDouble()%360));
-    }
-
-    //Auto section
 
     //Runs pathfinder with path
     public Command pathfind_test(String file){
@@ -469,16 +499,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         //In case everything fails
         return Commands.none();
     }
-    public void checkPerspective(){
-        DriverStation.getAlliance().ifPresent(allianceColor -> {
-                setOperatorPerspectiveForward(
-                    allianceColor == Alliance.Red
-                        ? kRedAlliancePerspectiveRotation
-                        : kBlueAlliancePerspectiveRotation
-                );
-                m_hasAppliedOperatorPerspective = true;
-        }
-        );
-    }
+    
 }
 

@@ -60,6 +60,7 @@ public class Robot extends TimedRobot {
 
         // Retrieves the voltage currently entering the roboRIO
         double batteryVoltage = RobotController.getBatteryVoltage();
+        
         SignalLogger.setPath("/home/lvuser/logs/");
 
     
@@ -78,7 +79,6 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         LimelightHelpers.SetIMUMode(dmllName, 1); // Seed internal IMU (1)
-
     }
 
     @Override
@@ -181,5 +181,5 @@ public class Robot extends TimedRobot {
             // End game, hub always active.
             return true;
         }
-        }
+    }
 }

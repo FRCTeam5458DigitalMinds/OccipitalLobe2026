@@ -9,9 +9,12 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+
 
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,14 +32,10 @@ public class Feeder extends SubsystemBase {
 
     Double testRPS;
 
-
-
     private final SysIdRoutine m_sysIdRoutine;
     private final VoltageOut m_voltReq = new VoltageOut(0.0);
 
     private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.FeederConstants.kS,Constants.FeederConstants.kV,Constants.FeederConstants.kA);
-
-
 
     public Feeder() {
         
@@ -44,12 +43,14 @@ public class Feeder extends SubsystemBase {
         TalonFXConfiguration feedConfigs = new TalonFXConfiguration();
         feedConfigs.CurrentLimits.withStatorCurrentLimit(40);
         feedConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
+        
         feedMotor.getConfigurator().apply(feedConfigs);
         
         feedMotor.setNeutralMode(NeutralModeValue.Coast); 
         
         SmartDashboard.putNumber("Feeder Test RPS", 85);
 
+        //SysID stuff
         m_sysIdRoutine = new SysIdRoutine(
               new SysIdRoutine.Config(
          null,        // Use default ramp rate (1 V/s)
