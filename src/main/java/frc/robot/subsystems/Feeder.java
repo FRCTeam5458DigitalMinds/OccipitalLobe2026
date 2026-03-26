@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.BangBangController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -32,6 +33,8 @@ public class Feeder extends SubsystemBase {
 
     private final SysIdRoutine m_sysIdRoutine;
     private final VoltageOut m_voltReq = new VoltageOut(0.0);
+
+    private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.FeederConstants.kS,Constants.FeederConstants.kV,Constants.FeederConstants.kA);
 
 
 
@@ -84,7 +87,7 @@ public class Feeder extends SubsystemBase {
     public Command BBtestMotors(){
       return run(
         () -> {
-          BBrps(testRPS);
+          BBrps(-testRPS);
         }
       );
     } 
@@ -98,7 +101,7 @@ public class Feeder extends SubsystemBase {
 
 
     public void BBrps(double RPS){
-        feedMotor.set(-controller.calculate(feedMotor.getVelocity().getValueAsDouble(), RPS));
+        feedMotor.setVoltage(controller.calculate(feedMotor.getVelocity().getValueAsDouble(), RPS)*12 + 0.9*feedforward.calculate(RPS));
     }
 
     //Function version of setting speed

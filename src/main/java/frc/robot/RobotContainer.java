@@ -134,7 +134,7 @@ public class RobotContainer {
             "Deploy Intake", 
             Commands.parallel(
                 m_Intake.runOnce(() -> {m_Intake.toSetpoint(0);}),
-                m_Roller.setSpeed(80)
+                m_Roller.setSpeed(90)
             )
         );
 
@@ -316,14 +316,14 @@ public class RobotContainer {
         );
     */
         //Run climb     
-        joystick.povLeft().whileTrue(
+        /*joystick.povLeft().whileTrue(
             m_Climber.toSetpoint(0)
         );
                 
         joystick.povRight().and(joystick.b()).onTrue(
             m_Climber.toSetpoint(1).until(m_Climber::readytoRest)
 
-            /*Commands.sequence(
+            Commands.sequence(
                 m_Climber.toSetpoint(1).until(m_Climber::readytoRest)
             .andThen(
                 drivetrain.runOnce(
@@ -336,14 +336,14 @@ public class RobotContainer {
                 )
             )
             .andThen(m_Climber.toSetpoint(0))
-            ).withTimeout(2.5)*/
-        );
+            ).withTimeout(2.5)
+        );*/
             /*Commands.sequence(
             m_Climber.toSetpoint(1)//.until(m_Climber::readytoClimb)
             .andThen(Commands.waitSeconds(0.25))
             //.andThen(m_Climber.toSetpoint(2))
             )*/
-
+        /*
         joystick.povUp().whileTrue(
             m_Climber.toSetpoint(1)
         );
@@ -352,36 +352,7 @@ public class RobotContainer {
 
             //Move down from tower and rests climber
             //new unclimb(drivetrain, m_Climber)
-        );
-
-
-        //work on later (Better shooter PID stuff)
-
-        /* Joystick B = Quasistatic forward
-        Joystick X = Quasistatic reverse */
-
-        joystick.b().whileTrue(
-            Commands.parallel(
-                m_Shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
-                m_Feeder.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
-                m_Indexer.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
-            )
-        );
-        joystick.x().whileTrue(
-            Commands.parallel(
-                m_Shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse),
-                m_Feeder.sysIdQuasistatic(SysIdRoutine.Direction.kReverse),
-                m_Indexer.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
-            )        
-        );
-
-        //Testing purposes
-        joystick.povLeft().onTrue(
-            Commands.runOnce(SignalLogger::start)
-        );
-        joystick.povRight().onTrue(
-            Commands.runOnce(SignalLogger::stop)
-        );
+        );*/
         
         /* */
         //Testing purposes
@@ -485,6 +456,50 @@ public class RobotContainer {
                     //m_Intake.slowRetract().until(m_Intake::atEnd)
                 )
         );
+   }
+
+
+   public void SysIDStuff(){
+    /* Joystick B = Quasistatic forward
+        Joystick X = Quasistatic reverse */
+        /*
+        joystick.y().whileTrue(
+            Commands.parallel(
+                m_Shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
+                m_Feeder.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
+                m_Indexer.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+            )
+        );
+        joystick.a().whileTrue(
+            Commands.parallel(
+                m_Shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse),
+                m_Feeder.sysIdQuasistatic(SysIdRoutine.Direction.kReverse),
+                m_Indexer.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+            )        
+        );
+        joystick.povUp().whileTrue(
+            Commands.parallel(
+                m_Shooter.sysIdDynamic(SysIdRoutine.Direction.kForward),
+                m_Feeder.sysIdDynamic(SysIdRoutine.Direction.kForward),
+                m_Indexer.sysIdDynamic(SysIdRoutine.Direction.kForward)
+            )        
+        );
+        joystick.povDown().whileTrue(
+            Commands.parallel(
+                m_Shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse),
+                m_Feeder.sysIdDynamic(SysIdRoutine.Direction.kReverse),
+                m_Indexer.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+            )        
+        );
+
+        //Testing purposes
+        joystick.povLeft().onTrue(
+            Commands.runOnce(SignalLogger::start)
+        );
+        joystick.povRight().onTrue(
+            Commands.runOnce(SignalLogger::stop)
+        ); */
+
    }
 
     

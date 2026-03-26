@@ -7,6 +7,7 @@ package frc.robot;
 import java.util.Optional;
 
 import com.ctre.phoenix6.HootAutoReplay;
+import com.ctre.phoenix6.SignalLogger;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -59,6 +60,8 @@ public class Robot extends TimedRobot {
 
         // Retrieves the voltage currently entering the roboRIO
         double batteryVoltage = RobotController.getBatteryVoltage();
+        SignalLogger.setPath("/home/lvuser/logs/");
+
     
         // Sends the value to SmartDashboard under the key "Battery Voltage"
         SmartDashboard.putNumber("Battery Voltage", batteryVoltage);

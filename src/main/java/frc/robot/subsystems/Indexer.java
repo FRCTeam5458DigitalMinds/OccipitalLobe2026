@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.BangBangController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -33,8 +34,10 @@ public class Indexer extends SubsystemBase {
     private final SysIdRoutine m_sysIdRoutine;
     private final VoltageOut m_voltReq = new VoltageOut(0.0);
 
+    private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.IndexerConstants.kS,Constants.IndexerConstants.kV,Constants.IndexerConstants.kA);
 
 
+  
 
     public Indexer() {
 
@@ -94,7 +97,7 @@ public class Indexer extends SubsystemBase {
     } 
 
     public void BBrps(double RPS){
-        indexerMotor.set(controller.calculate(indexerMotor.getVelocity().getValueAsDouble(), RPS));
+        indexerMotor.setVoltage(controller.calculate(indexerMotor.getVelocity().getValueAsDouble(), RPS)*12 + 0.9*feedforward.calculate(RPS));
     }
 
     //Sets the speed of the Indexer Motor

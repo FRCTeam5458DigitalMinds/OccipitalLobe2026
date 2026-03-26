@@ -71,6 +71,8 @@ public class Shooter extends SubsystemBase {
     private final SysIdRoutine m_sysIdRoutine;
     private final VoltageOut m_voltReq = new VoltageOut(0.0);
 
+    private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.ShooterConstants.kS,Constants.ShooterConstants.kV,Constants.ShooterConstants.kA);
+
     Double testRPS;
 
     SysIdRoutine routine;
@@ -236,7 +238,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void BBrps(double RPS){
-        lowerFlyMotor.set(controller.calculate(lowerFlyMotor.getVelocity().getValueAsDouble(), RPS));
+        lowerFlyMotor.setVoltage(controller.calculate(lowerFlyMotor.getVelocity().getValueAsDouble(), RPS)*12 + 0.9*feedforward.calculate(RPS));
     }
 
     public void setTargetRPS(double RPS){

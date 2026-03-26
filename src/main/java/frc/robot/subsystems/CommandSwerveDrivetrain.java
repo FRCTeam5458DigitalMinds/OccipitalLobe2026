@@ -390,6 +390,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                     mt2.pose,
                     mt2.timestampSeconds);
             }
+        checkPerspective();
     }
 
     private void configureAutoBuilder() {
@@ -467,6 +468,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         //In case everything fails
         return Commands.none();
+    }
+    public void checkPerspective(){
+        DriverStation.getAlliance().ifPresent(allianceColor -> {
+                setOperatorPerspectiveForward(
+                    allianceColor == Alliance.Red
+                        ? kRedAlliancePerspectiveRotation
+                        : kBlueAlliancePerspectiveRotation
+                );
+                m_hasAppliedOperatorPerspective = true;
+        }
+        );
     }
 }
 
