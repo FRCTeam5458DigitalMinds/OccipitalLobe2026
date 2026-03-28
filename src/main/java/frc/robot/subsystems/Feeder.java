@@ -48,7 +48,8 @@ public class Feeder extends SubsystemBase {
         
         feedMotor.setNeutralMode(NeutralModeValue.Coast); 
         
-        SmartDashboard.putNumber("Feeder Test RPS", 85);
+        SmartDashboard.putNumber("Feeder Test RPS", 75.13);
+        //45
 
         //SysID stuff
         m_sysIdRoutine = new SysIdRoutine(
@@ -114,7 +115,7 @@ public class Feeder extends SubsystemBase {
     //Continuously runs
     @Override
     public void periodic() {
-      testRPS = SmartDashboard.getNumber("Feeder Test RPS", 85);
+      testRPS = SmartDashboard.getNumber("Feeder Test RPS", 75.13);
       SmartDashboard.putNumber("Feeder RPS", feedMotor.getVelocity().getValueAsDouble());
 
     } 

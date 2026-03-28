@@ -117,7 +117,9 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
 
+
         LimelightHelpers.SetIMUMode(dmllName, 4);
+        LimelightHelpers.SetIMUAssistAlpha("limelight", 0.01);
     }
 
     @Override

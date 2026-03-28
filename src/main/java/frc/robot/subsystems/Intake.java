@@ -130,4 +130,10 @@ public class Intake extends SubsystemBase {
     public boolean AutoatEnd(){
       return getPosition() < setpoints[1]+((setpoints[1]+Math.abs(setpoints[0]))/4);
     }
+
+    /*public Command resetPosition() {
+      return intakeMotor.setPosition(-3.219970703125);
+
+
+    }*/
 }

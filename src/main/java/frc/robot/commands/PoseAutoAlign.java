@@ -1,9 +1,10 @@
 package frc.robot.commands;
 
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.RawFiducial;
 import frc.robot.subsystems.*;
 
@@ -17,43 +18,59 @@ public class PoseAutoAlign extends Command {
 
     CommandSwerveDrivetrain DRIVETRAIN;
     SwerveRequest.FieldCentric robotDrive;
+    public double dX;
+    public double dY;
+    public double targetRotation;
+
+    public double AngleError;
 
 
-    Double maxAnglSpeed; //Max Angular Speed
 
-    Translation2d hubPose = new Translation2d();
+    Double maxAnglSpeed; // Max Angular Speed
 
-    public PoseAutoAlign(CommandSwerveDrivetrain drivetrain, Double maxAngularSpeed) 
-    {
+    public PoseAutoAlign(CommandSwerveDrivetrain drivetrain) {
         this.DRIVETRAIN = drivetrain;
         robotDrive = new SwerveRequest.FieldCentric().withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-        maxAnglSpeed = maxAngularSpeed;
 
         addRequirements(drivetrain);
+
     }
 
-    //puts the Target ID on the Dashboard
-    public void initialize()
-    {   
-        DRIVETRAIN.setControl(
-            robotDrive.withRotationalRate(0)
-                      .withVelocityX(0)
-                      .withVelocityY(0)
-        );
+    // puts the Target ID on the Dashboard
+    public void initialize() {
     }
 
-    //runs 
-    public void execute()
-    {
+    // runs
+    public void execute() {
+        dX = DRIVETRAIN.getPose().getTranslation().getX() - DRIVETRAIN.setHub().getX();
+        dY = DRIVETRAIN.getPose().getTranslation().getY() - DRIVETRAIN.setHub().getY();
+        targetRotation = Math.atan2(dY,dX);
+
+        AngleError = targetRotation - DRIVETRAIN.getPose().getRotation().getRadians();
+        AngleError = MathUtil.angleModulus(AngleError);
         DRIVETRAIN.setControl(
             robotDrive.withVelocityX(0)
-        );
-        //runs "isFinished" function to say how it is done
+                      .withVelocityY(0)
+                      .withRotationalRate(AngleError)
+        );      
+        isFinished();
     }
 
-    public void end(boolean interupted){
+    // sets boolean for its done to stop the comand
+    @Override
+    public boolean isFinished() {
+        if (Math.abs(AngleError) < Math.toRadians(3)){
+            DRIVETRAIN.setControl(
+               new SwerveRequest.Idle() 
+            );
+            return true;
+        }
+        return false;
+    }
+    @Override
+    public void end(boolean interrupted){
         DRIVETRAIN.setControl(
-            robotDrive.withRotationalRate(0)
-        );
+            new SwerveRequest.Idle() 
+        );  
     }
 }

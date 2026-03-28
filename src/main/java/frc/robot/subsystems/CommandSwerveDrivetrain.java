@@ -257,6 +257,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void periodic() {
         //5458 Stuff(See implentation below)
         updateOdometry();
+        distToHub();
         
         /*
          * Periodically try to apply the operator perspective.
@@ -354,6 +355,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     {
         resetPose(startingPose);
     }
+    public void fieldResetPose()
+    {
+        resetPose(new Pose2d());
+    }
     
     //Updates the position of the robot
     public void updateOdometry() {
@@ -383,6 +388,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     //Caluculte distance (in the works)
     public double distToHub(){
+        SmartDashboard.putNumber("Pose Distance", getPose().getTranslation().getDistance(setHub()));
         return getPose().getTranslation().getDistance(setHub());
     }
 
@@ -411,7 +417,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
     }
 
-    //Checks if robot is facing driver station
+    //Checks if robot is facing driver station (never use)
     public boolean facingDriver(){
         double yaw = Math.abs(pigeon.getYaw().getValueAsDouble()%360);
         return (yaw > 320 || yaw < 40);

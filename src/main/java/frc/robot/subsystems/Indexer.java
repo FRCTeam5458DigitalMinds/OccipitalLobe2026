@@ -44,7 +44,7 @@ public class Indexer extends SubsystemBase {
         //Sets up the settings for the Indexer Motor
         indexerMotor = new TalonFX(Constants.IndexerConstants.indexMotor);
         TalonFXConfiguration indexerConfigs = new TalonFXConfiguration();
-        indexerConfigs.CurrentLimits.withStatorCurrentLimit(40);
+        indexerConfigs.CurrentLimits.withStatorCurrentLimit(65);
         indexerConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
 
         indexerMotor.getConfigurator().apply(indexerConfigs);

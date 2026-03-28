@@ -64,18 +64,18 @@ public final class Constants {
     public static final double i_Value = 0.0;
     public static final double d_Value = 0.0;
 
-    public static final double kS = 0.25008;
-    public static final double kV = 0.1212;
-    public static final double kA = 0.007865;
+    public static final double kS = 0.22498;
+    public static final double kV = 0.12323;
+    public static final double kA = 0.013054;
 
   }
   
   public static class FeederConstants {
     public static final int feeder = 22;
 
-    public static final double kS = 0.13537;
-    public static final double kV = 0.11707;
-    public static final double kA = 0.0024146;
+    public static final double kS = 0.13157;
+    public static final double kV = 0.11908;
+    public static final double kA = 0.0066253;
   }
 
   public static class LEDConstants{

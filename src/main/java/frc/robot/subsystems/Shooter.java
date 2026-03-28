@@ -51,9 +51,6 @@ public class Shooter extends SubsystemBase {
     BangBangController controller = new BangBangController();
 
     InterpolatingDoubleTreeMap shooterRPS;
-    InterpolatingDoubleTreeMap NewshooterRPS;
-    InterpolatingDoubleTreeMap NewershooterRPS;
-    
 
     /*Notes:
     10%: 550
@@ -118,6 +115,7 @@ public class Shooter extends SubsystemBase {
             *Uses data points to estimate value based off key
         */
 
+        /* Old shooter table values
         shooterRPS = new InterpolatingDoubleTreeMap();
         //Key: distance 
         //Value: velocity of shooter
@@ -148,6 +146,19 @@ public class Shooter extends SubsystemBase {
         NewershooterRPS.put(3.428045861139117,34.01); // Corner (rough max)
 
         //NewershooterRPS.put(1.1445679370483035,25.73); //
+      */
+
+
+      shooterRPS = new InterpolatingDoubleTreeMap();
+        //Key: distance in meters
+        //Value: velocity of shooter
+
+      shooterRPS.put(2.084979071669848,24.55); //close (tune again)
+      shooterRPS.put(3.0008923066606354,27.02); //Standard
+      shooterRPS.put(4.434153557029914,34.01); //Far
+
+
+
 
 
         //After Week 3 feature
@@ -166,7 +177,8 @@ public class Shooter extends SubsystemBase {
         )
       );
 
-      SmartDashboard.putNumber("Shooter Test RPS", 30);
+      SmartDashboard.putNumber("Shooter Test RPS", 27.02);
+      //35
         
     }
 
@@ -257,10 +269,8 @@ public class Shooter extends SubsystemBase {
     //Continuously runs
    @Override
    public void periodic() {
-    testRPS = SmartDashboard.getNumber("Shooter Test RPS", 30);
+    testRPS = SmartDashboard.getNumber("Shooter Test RPS", 27.02);
     SmartDashboard.putNumber("Shooter RPS", lowerFlyMotor.getVelocity().getValueAsDouble());
-
-
   }
 
 }

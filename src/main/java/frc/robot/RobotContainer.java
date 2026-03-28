@@ -7,6 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import java.io.IOException;
+import java.nio.channels.WritableByteChannel;
 
 import org.json.simple.parser.ParseException;
 
@@ -19,6 +20,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -203,9 +205,9 @@ public class RobotContainer {
             m_Feeder.setSpeed(0)
         );
         m_Hood.setDefaultCommand(
-            m_Hood.toSetpoint(0)
-            .andThen(m_Hood.runOnce(() -> {m_Hood.getPosition();}))
-            //m_Hood.runOnce(() -> {m_Hood.getPosition();})
+            /*m_Hood.toSetpoint(0)
+            .andThen(m_Hood.runOnce(() -> {m_Hood.getPosition();}))*/
+            m_Hood.runOnce(() -> {m_Hood.getPosition();})
         );
         m_Indexer.setDefaultCommand(
             m_Indexer.setSpeed(0)
@@ -247,15 +249,22 @@ public class RobotContainer {
         /* Main Commands */
 
         // Reset the field-centric heading on back button press.
-        joystick.back().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
+        joystick.back().onTrue(
+            Commands.sequence(
+                drivetrain.runOnce(drivetrain::seedFieldCentric)
+                /*drivetrain.runOnce(
+                    () -> {drivetrain.fieldResetPose();}
+                )*/
+            )
+        );
 
         // Controls
+
         /*joystick.start().whileTrue(
             new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate, m_LED).until(m_Limelight::isCentered)
-            .andThen(m_LED.LEDon().repeatedly())
         );*/
 
-        //All this to shoot btw
+        //Main shoot
         joystick.rightTrigger().whileTrue(
             //Two parts: shooter & hood and everything else
             Commands.parallel(
@@ -264,93 +273,24 @@ public class RobotContainer {
                 hubShoot(),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
-                Commands.waitSeconds(1)
+                Commands.waitSeconds(1.25)
                 .andThen(
                     //Two parts: index & feeder and intake
                     restOfShoot()
                 )
             )
         );
+            
+        intakeCtrl();
+        //sysIDCtrl();
+        climbCtrl();
+        hoodCtrl();
 
-        //Extends intake
-        joystick.leftTrigger(0.05).whileTrue(
-            Commands.parallel(
-                m_Intake.run(
-                    () -> {m_Intake.toSetpoint(0);}
-                ),
-                m_Roller.setSpeed(80)
-            )
-        );
         
-        //Backup intake control
-        //Was povUp (might change later)
-        joystick.x().whileTrue(
-            m_Intake.runEnd(
-                () -> {m_Intake.setIntake(90);}, 
-                () -> {m_Intake.setIntake(0);}
-            )
-        );
-
         joystick.y().whileTrue(
             m_Indexer.setSpeed(-45)
         );
-                /*
-        //Test hood
-        joystick.a().whileTrue(
-            m_Hood.runEnd(
-                () -> {m_Hood.setHood(-5);},
-                () -> {m_Hood.setHood(0);}
-            )
-        );
-
-
-        //Test hood
-        joystick.y().whileTrue(
-            m_Hood.runEnd(
-                () -> {m_Hood.setHood(5);},
-                () -> {m_Hood.setHood(0);}
-            )
-        );
-    */
-        //Run climb     
-        /*joystick.povLeft().whileTrue(
-            m_Climber.toSetpoint(0)
-        );
-                
-        joystick.povRight().and(joystick.b()).onTrue(
-            m_Climber.toSetpoint(1).until(m_Climber::readytoRest)
-
-            Commands.sequence(
-                m_Climber.toSetpoint(1).until(m_Climber::readytoRest)
-            .andThen(
-                drivetrain.runOnce(
-                    () -> {drivetrain.setControl(drive.withVelocityX(1));}
-                )
-            )
-            .andThen(Commands.waitSeconds(0.5))
-            .andThen(drivetrain.runOnce(
-                    () -> {drivetrain.setControl(drive.withVelocityX(0));}
-                )
-            )
-            .andThen(m_Climber.toSetpoint(0))
-            ).withTimeout(2.5)
-        );*/
-            /*Commands.sequence(
-            m_Climber.toSetpoint(1)//.until(m_Climber::readytoClimb)
-            .andThen(Commands.waitSeconds(0.25))
-            //.andThen(m_Climber.toSetpoint(2))
-            )*/
-        /*
-        joystick.povUp().whileTrue(
-            m_Climber.toSetpoint(1)
-        );
-        joystick.povDown().whileTrue(
-            m_Climber.toSetpoint(2)
-
-            //Move down from tower and rests climber
-            //new unclimb(drivetrain, m_Climber)
-        );*/
-        
+      
         /* */
         //Testing purposes
         //test shooter rps
@@ -383,16 +323,20 @@ public class RobotContainer {
                 ),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
-                Commands.waitSeconds(1)
+                Commands.waitSeconds(1.25)
                 .andThen(
                     BBrestOfShoot()
                 )
             )
         );
     }
+
+    //When hub is inactive or at neutral zone
     public Command ferryShoot(){
         return m_Shooter.PIDrunMotors(25.5).alongWith(m_Hood.toSetpoint(1));
     }
+
+    //Auto align will change
     public Command hubShoot(){
         return new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate).until(m_Limelight::isCentered).withTimeout(0.5)
                     .andThen(m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()).alongWith(m_Hood.run(() -> {m_Hood.getPosition();})))
@@ -401,9 +345,9 @@ public class RobotContainer {
 
     //Experimental shooting stuff
     public Command testShoot(){
-        return m_Shooter.BBtestMotors();
-
+        return m_Shooter.BBtestMotors();//.alongWith(m_Indexer.setSpeed(-45).withTimeout(1.25));
     }
+    /* 
 //run shooter based on distance
     public Command mainShoot(){
         return new ConditionalCommand(
@@ -415,7 +359,7 @@ public class RobotContainer {
                 //Conditional: check if robot is facing drivers
                 drivetrain::facingDriver
             );
-    }
+    }*/
     
     //Two parts: index & feeder
     //run both feeder and indexer
@@ -456,10 +400,11 @@ public class RobotContainer {
    }
 
 
-   public void SysIDStuff(){
+   public void sysIDCtrl(){
     /* Joystick B = Quasistatic forward
         Joystick X = Quasistatic reverse */
-        /*
+        
+        //Run tests for about 10 seconds
         joystick.y().whileTrue(
             Commands.parallel(
                 m_Shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward),
@@ -489,16 +434,108 @@ public class RobotContainer {
             )        
         );
 
-        //Testing purposes
+        //Run signal logger
         joystick.povLeft().onTrue(
             Commands.runOnce(SignalLogger::start)
         );
         joystick.povRight().onTrue(
             Commands.runOnce(SignalLogger::stop)
-        ); */
+        );
+   }
+   public void hoodCtrl(){
+        //Test hood
+        joystick.a().whileTrue(
+            m_Hood.runEnd(
+                () -> {m_Hood.setHood(-5);},
+                () -> {m_Hood.setHood(0);}
+            )
+        );
+
+
+        //Test hood
+        joystick.b().whileTrue(
+            m_Hood.runEnd(
+                () -> {m_Hood.setHood(5);},
+                () -> {m_Hood.setHood(0);}
+            )
+        );
 
    }
+   public void climbCtrl(){
+    //Run climb     
+        joystick.povLeft().whileTrue(
+            m_Climber.toSetpoint(0)
+        );
+                
+        joystick.povRight().and(joystick.b()).onTrue(
+            m_Climber.toSetpoint(1).until(m_Climber::readytoRest)
+        );
+            /*
+            Commands.sequence(
+                m_Climber.toSetpoint(1).until(m_Climber::readytoRest)
+            .andThen(
+                drivetrain.runOnce(
+                    () -> {drivetrain.setControl(drive.withVelocityX(1));}
+                )
+            )
+            .andThen(Commands.waitSeconds(0.5))
+            .andThen(drivetrain.runOnce(
+                    () -> {drivetrain.setControl(drive.withVelocityX(0));}
+                )
+            )
+            .andThen(m_Climber.toSetpoint(0))
+            ).withTimeout(2.5)
+            );
+            */
 
+            /*Commands.sequence(
+            m_Climber.toSetpoint(1)//.until(m_Climber::readytoClimb)
+            .andThen(Commands.waitSeconds(0.25))
+            //.andThen(m_Climber.toSetpoint(2))
+            )*/
+        
+        joystick.povUp().whileTrue(
+            m_Climber.toSetpoint(1)
+        );
+        joystick.povDown().whileTrue(
+            m_Climber.toSetpoint(2)
+
+            //Move down from tower and rests climber
+            //new unclimb(drivetrain, m_Climber)
+        );
+   }
+
+   public void intakeCtrl(){
+        //Extends intake
+        joystick.leftTrigger(0.05).whileTrue(
+            Commands.parallel(
+                m_Intake.run(
+                    () -> {m_Intake.toSetpoint(0);}
+                ),
+                m_Roller.setSpeed(80)
+            )
+        );
+        
+        //Backup intake control
+        //Was povUp (might change later)
+        joystick.x().whileTrue(
+            m_Intake.runEnd(
+                () -> {m_Intake.setIntake(90);}, 
+                () -> {m_Intake.setIntake(0);}
+            )
+        );
+
+        /*joystick.povRight().and(joystick.x()).onTrue(
+            m_Intake.runOnce(
+                () -> {m_Intake.setPosition(-3.219970703125);}
+            )
+        );*/
+   }
+   public void testCtrl(){
+
+    new PoseAutoAlign(drivetrain);
+
+   }
     
     public Command getAutonomousCommand() {
         return autoChooser2.getSelected();
