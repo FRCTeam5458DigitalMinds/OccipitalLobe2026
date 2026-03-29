@@ -1,6 +1,8 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -23,10 +25,8 @@ public class PoseAutoAlign extends Command {
     public double targetRotation;
 
     public double AngleError;
-
-
-
-    Double maxAnglSpeed; // Max Angular Speed
+    
+    private static final Translation2d shooterOffset = new Translation2d(0, 0.184);
 
     public PoseAutoAlign(CommandSwerveDrivetrain drivetrain) {
         this.DRIVETRAIN = drivetrain;
@@ -46,8 +46,16 @@ public class PoseAutoAlign extends Command {
         dY = DRIVETRAIN.getPose().getTranslation().getY() - DRIVETRAIN.setHub().getY();
         targetRotation = Math.atan2(dY,dX);
 
-        AngleError = targetRotation - DRIVETRAIN.getPose().getRotation().getRadians();
+        Pose2d pose = DRIVETRAIN.getPose();
+
+        Translation2d shooterPose = pose.getTranslation().plus(shooterOffset.rotateBy(pose.getRotation()));
+
+        Translation2d toHub = DRIVETRAIN.setHub().minus(shooterPose);
+        targetRotation = toHub.getAngle().getRadians();
+
+        AngleError = targetRotation - pose.getRotation().getRadians();
         AngleError = MathUtil.angleModulus(AngleError);
+
         DRIVETRAIN.setControl(
             robotDrive.withVelocityX(0)
                       .withVelocityY(0)
@@ -59,14 +67,9 @@ public class PoseAutoAlign extends Command {
     // sets boolean for its done to stop the comand
     @Override
     public boolean isFinished() {
-        if (Math.abs(AngleError) < Math.toRadians(3)){
-            DRIVETRAIN.setControl(
-               new SwerveRequest.Idle() 
-            );
-            return true;
-        }
-        return false;
+        return (Math.abs(AngleError) < Math.toRadians(3));
     }
+
     @Override
     public void end(boolean interrupted){
         DRIVETRAIN.setControl(

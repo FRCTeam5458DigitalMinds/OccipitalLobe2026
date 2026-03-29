@@ -124,7 +124,8 @@ public class RobotContainer {
         );
         NamedCommands.registerCommand(
             "Prepare shoot", 
-            m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag())
+            Commands.none()
+            //m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag())
         );
 
         //Intake
@@ -323,10 +324,9 @@ public class RobotContainer {
                 ),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
-                Commands.waitSeconds(1.25)
-                .andThen(
-                    BBrestOfShoot()
-                )
+                m_Indexer.setSpeed(-45).withTimeout(0.1)
+                .andThen(Commands.waitSeconds(1.5))
+                .andThen(BBrestOfShoot())
             )
         );
     }
@@ -339,13 +339,14 @@ public class RobotContainer {
     //Auto align will change
     public Command hubShoot(){
         return new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate).until(m_Limelight::isCentered).withTimeout(0.5)
-                    .andThen(m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()).alongWith(m_Hood.run(() -> {m_Hood.getPosition();})))
+                    //.andThen(m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()).alongWith(m_Hood.run(() -> {m_Hood.getPosition();})))
             ;
     }
 
     //Experimental shooting stuff
     public Command testShoot(){
-        return m_Shooter.BBtestMotors();//.alongWith(m_Indexer.setSpeed(-45).withTimeout(1.25));
+        return new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate).until(m_Limelight::isCentered).withTimeout(0.5)
+                    .andThen(m_Shooter.PIDtreeRunMotors().alongWith(m_Hood.run(() -> {m_Hood.getPosition();})));
     }
     /* 
 //run shooter based on distance
@@ -383,7 +384,7 @@ public class RobotContainer {
 
    public Command BBrestOfShoot(){
         return Commands.parallel(
-            m_Feeder.BBtestMotors(),
+            m_Feeder.PIDtreeRunMotors(),
             m_Indexer.BBtestMotors(),
             m_Roller.setSpeed(80),
             Commands.waitSeconds(1.5)

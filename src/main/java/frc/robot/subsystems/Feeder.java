@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -32,6 +33,9 @@ public class Feeder extends SubsystemBase {
 
     Double testRPS;
 
+    //sets up velocity PID for slot 0
+    final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
+
     private final SysIdRoutine m_sysIdRoutine;
     private final VoltageOut m_voltReq = new VoltageOut(0.0);
 
@@ -41,7 +45,13 @@ public class Feeder extends SubsystemBase {
         
         feedMotor = new TalonFX(Constants.FeederConstants.feeder);
         TalonFXConfiguration feedConfigs = new TalonFXConfiguration();
-        feedConfigs.CurrentLimits.withStatorCurrentLimit(40);
+        feedConfigs.Slot0.kS = Constants.ShooterConstants.kS;
+        feedConfigs.Slot0.kV = Constants.ShooterConstants.kV;
+        feedConfigs.Slot0.kA = Constants.ShooterConstants.kA;
+        feedConfigs.Slot0.kP = Constants.ShooterConstants.p_Value;
+
+
+        feedConfigs.CurrentLimits.withStatorCurrentLimit(60);
         feedConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
         
         feedMotor.getConfigurator().apply(feedConfigs);
@@ -85,6 +95,17 @@ public class Feeder extends SubsystemBase {
             setFeeder(OutputPercent);
           });
     }
+
+    public Command PIDtreeRunMotors(){
+      return run(
+          () -> {
+            setTargetRPS(-testRPS);
+          }
+      );
+    }
+
+
+
     //Just Bang Bang
     public Command BBtestMotors(){
       return run(
@@ -104,6 +125,11 @@ public class Feeder extends SubsystemBase {
 
     public void BBrps(double RPS){
         feedMotor.setVoltage(controller.calculate(feedMotor.getVelocity().getValueAsDouble(), RPS)*12 + 0.9*feedforward.calculate(RPS));
+    }
+
+    public void setTargetRPS(double RPS){
+      SmartDashboard.putNumber("RPS", feedMotor.getVelocity().getValueAsDouble());
+      feedMotor.setControl(m_request.withVelocity(RPS));
     }
 
     //Function version of setting speed

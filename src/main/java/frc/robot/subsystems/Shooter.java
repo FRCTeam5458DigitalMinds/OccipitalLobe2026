@@ -71,6 +71,7 @@ public class Shooter extends SubsystemBase {
     private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.ShooterConstants.kS,Constants.ShooterConstants.kV,Constants.ShooterConstants.kA);
 
     Double testRPS;
+    Double attemptRPS;
 
     SysIdRoutine routine;
     public Shooter() {
@@ -80,17 +81,15 @@ public class Shooter extends SubsystemBase {
         //Sets settings for the Lower Flywheel
         
         TalonFXConfiguration globalConfigs = new TalonFXConfiguration();
-        globalConfigs.CurrentLimits.withStatorCurrentLimit(40);
+        globalConfigs.CurrentLimits.withStatorCurrentLimit(60);
         globalConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
         
         //setups the PID value for the intake
       
-        globalConfigs.Slot0.kS = Constants.ShooterConstants.s_Value;
-        globalConfigs.Slot0.kV = Constants.ShooterConstants.v_Value; // A velocity target of 1 rps results in 0.12 V output
+        globalConfigs.Slot0.kS = Constants.ShooterConstants.kS;
+        globalConfigs.Slot0.kV = Constants.ShooterConstants.kV;
+        globalConfigs.Slot0.kA = Constants.ShooterConstants.kA;
         globalConfigs.Slot0.kP = Constants.ShooterConstants.p_Value;
-
-        globalConfigs.Voltage.withPeakForwardVoltage(8)
-        .withPeakReverseVoltage(-8);
         
         lowerFlyMotor = new TalonFX(Constants.ShooterConstants.lowerFlyWheel);
         
@@ -154,12 +153,8 @@ public class Shooter extends SubsystemBase {
         //Value: velocity of shooter
 
       shooterRPS.put(2.084979071669848,24.55); //close (tune again)
-      shooterRPS.put(3.0008923066606354,27.02); //Standard
-      shooterRPS.put(4.434153557029914,34.01); //Far
-
-
-
-
+      shooterRPS.put(3.0008923066606354,26.); //Standard
+      shooterRPS.put(4.434153557029914,32.5); //Far
 
         //After Week 3 feature
         m_sysIdRoutine = new SysIdRoutine(
@@ -226,10 +221,10 @@ public class Shooter extends SubsystemBase {
       );
     }
 
-    public Command PIDtreeRunMotors(double distance){
+    public Command PIDtreeRunMotors(){
       return run(
           () -> {
-            setTargetRPS(shooterRPS.get(distance));
+            setTargetRPS(attemptRPS);
           }
       );
     }
@@ -245,6 +240,15 @@ public class Shooter extends SubsystemBase {
       return run(
         () -> {
           BBrps(testRPS);
+        }
+      );
+    }
+
+    //Just Bang Bang
+    public Command BBtreeMotors(double distance){
+      return run(
+        () -> {
+          BBrps(shooterRPS.get(distance));
         }
       );
     }
@@ -269,6 +273,9 @@ public class Shooter extends SubsystemBase {
     //Continuously runs
    @Override
    public void periodic() {
+    attemptRPS = shooterRPS.get(SmartDashboard.getNumber("Pose Distance", 27.02));
+
+    SmartDashboard.putNumber("Attempted Shooter RPS", shooterRPS.get(SmartDashboard.getNumber("Pose Distance", 27.02)));
     testRPS = SmartDashboard.getNumber("Shooter Test RPS", 27.02);
     SmartDashboard.putNumber("Shooter RPS", lowerFlyMotor.getVelocity().getValueAsDouble());
   }
