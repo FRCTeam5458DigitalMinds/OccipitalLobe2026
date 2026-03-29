@@ -152,7 +152,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        pigeon.reset();
         //seedFieldCentric();
         configureAutoBuilder();
         //Puts field onto Elastic
@@ -391,6 +390,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return getPose().getTranslation().getDistance(setHub());
     }
 
+
     //Megatag2 section
     private void megatag2Setup(){
         boolean doRejectUpdate = false;
@@ -409,7 +409,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         //updates position based on tag if nothings wrong 
         if(!doRejectUpdate){
             LimelightHelpers.SetRobotOrientation(Constants.LimelightConstants.ll_Name, getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-            setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,999999));
+            setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,999999));
             addVisionMeasurement(
                 mt2.pose,
                 mt2.timestampSeconds);

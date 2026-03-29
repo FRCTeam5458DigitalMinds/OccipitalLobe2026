@@ -9,6 +9,10 @@ import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.RawFiducial;
 import frc.robot.subsystems.*;
+import edu.wpi.first.units.measure.Distance;
+
+import static edu.wpi.first.units.Units.Inch;
+import static edu.wpi.first.units.Units.Meters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +24,11 @@ public class PoseAutoAlign extends Command {
 
     CommandSwerveDrivetrain DRIVETRAIN;
     SwerveRequest.FieldCentric robotDrive;
-    public double dX;
-    public double dY;
     public double targetRotation;
 
     public double AngleError;
     
-    private static final Translation2d shooterOffset = new Translation2d(0, 0.184);
+    private static final Translation2d shooterOffset = new Translation2d(Inch.of(9).in(Meters), 0.184);
 
     public PoseAutoAlign(CommandSwerveDrivetrain drivetrain) {
         this.DRIVETRAIN = drivetrain;
@@ -42,9 +44,6 @@ public class PoseAutoAlign extends Command {
 
     // runs
     public void execute() {
-        dX = DRIVETRAIN.getPose().getTranslation().getX() - DRIVETRAIN.setHub().getX();
-        dY = DRIVETRAIN.getPose().getTranslation().getY() - DRIVETRAIN.setHub().getY();
-        targetRotation = Math.atan2(dY,dX);
 
         Pose2d pose = DRIVETRAIN.getPose();
 
@@ -59,7 +58,7 @@ public class PoseAutoAlign extends Command {
         DRIVETRAIN.setControl(
             robotDrive.withVelocityX(0)
                       .withVelocityY(0)
-                      .withRotationalRate(AngleError)
+                      .withRotationalRate(AngleError*4)
         );      
         isFinished();
     }
@@ -67,7 +66,7 @@ public class PoseAutoAlign extends Command {
     // sets boolean for its done to stop the comand
     @Override
     public boolean isFinished() {
-        return (Math.abs(AngleError) < Math.toRadians(3));
+        return (Math.abs(AngleError) < Math.toRadians(1.5));
     }
 
     @Override

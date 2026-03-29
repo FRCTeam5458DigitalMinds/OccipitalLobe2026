@@ -318,10 +318,8 @@ public class RobotContainer {
             Commands.parallel(
                 //Part 1
                 //Two parts: run shooter and run hood depending on where the robot is facing
-                Commands.parallel(
-                    //run shooter based on distance
-                    testShoot()
-                ),
+                //run shooter based on distance
+                new PoseAutoAlign(drivetrain).withTimeout(0.5).alongWith(testShoot()),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
                 m_Indexer.setSpeed(-45).withTimeout(0.1)
@@ -345,8 +343,7 @@ public class RobotContainer {
 
     //Experimental shooting stuff
     public Command testShoot(){
-        return new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate).until(m_Limelight::isCentered).withTimeout(0.5)
-                    .andThen(m_Shooter.PIDtreeRunMotors().alongWith(m_Hood.run(() -> {m_Hood.getPosition();})));
+        return m_Shooter.PIDtreeRunMotors().alongWith(m_Hood.run(() -> {m_Hood.getPosition();}));
     }
     /* 
 //run shooter based on distance
