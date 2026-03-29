@@ -111,21 +111,18 @@ public class RobotContainer {
             Commands.parallel(
                 //Part 1
                 //Two parts: run shooter and run hood depending on where the robot is facing
-                hubShoot(),
+                new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate).until(m_Limelight::isCentered).withTimeout(0.5).alongWith(hubShoot()),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
-                Commands.waitSeconds(1)
-                .andThen(
-                    //Two parts: index & feeder
-                    //run both feeder and indexer
-                    restOfShoot()
-                )
+                //Part 2
+                //Add 1 Second delay of cmd group 2
+                Commands.waitSeconds(1.5)
+                .andThen(BBrestOfShoot())
             )
         );
         NamedCommands.registerCommand(
             "Prepare shoot", 
-            Commands.none()
-            //m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag())
+            m_Shooter.PIDtreeRunMotors().alongWith(m_Indexer.setSpeed(-45).withTimeout(0.1))
         );
 
         //Intake
@@ -252,7 +249,9 @@ public class RobotContainer {
         // Reset the field-centric heading on back button press.
         joystick.back().onTrue(
             Commands.sequence(
-                drivetrain.runOnce(drivetrain::seedFieldCentric)
+                drivetrain.runOnce(
+                    drivetrain::seedFieldCentric
+                )
                 /*drivetrain.runOnce(
                     () -> {drivetrain.fieldResetPose();}
                 )*/
@@ -271,14 +270,14 @@ public class RobotContainer {
             Commands.parallel(
                 //Part 1
                 //Two parts: run shooter and run hood depending on where the robot is facing
-                hubShoot(),
+                new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate).until(m_Limelight::isCentered).withTimeout(0.5).alongWith(hubShoot()),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
-                Commands.waitSeconds(1.25)
-                .andThen(
-                    //Two parts: index & feeder and intake
-                    restOfShoot()
-                )
+                //Part 2
+                //Add 1 Second delay of cmd group 2
+                m_Indexer.setSpeed(-45).withTimeout(0.1)
+                .andThen(Commands.waitSeconds(1.5))
+                .andThen(BBrestOfShoot())
             )
         );
             
@@ -336,8 +335,7 @@ public class RobotContainer {
 
     //Auto align will change
     public Command hubShoot(){
-        return new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate).until(m_Limelight::isCentered).withTimeout(0.5)
-                    //.andThen(m_Shooter.PIDtreeRunMotors(m_Limelight.getDistToNearestTag()).alongWith(m_Hood.run(() -> {m_Hood.getPosition();})))
+        return m_Shooter.PIDtreeRunMotors().alongWith(m_Hood.run(() -> {m_Hood.getPosition();}))
             ;
     }
 

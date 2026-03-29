@@ -34,7 +34,9 @@ public class Limelight extends SubsystemBase{
 //pose thingys
    private LimelightHelpers.PoseEstimate limelightMeasurement = new LimelightHelpers.PoseEstimate();
 
-   public Limelight(){}
+   public Limelight(){
+    LimelightHelpers.setCameraPose_RobotSpace(dmllName, 0.06, 0.249, 0.461, 0, 25, 0);
+   }
 
    //Change smartdashboard to elastic later
     // Basic targeting data

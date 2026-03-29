@@ -369,7 +369,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         m_field.getObject("hub").setPose(setHub().getMeasureX() ,setHub().getMeasureY(), Rotation2d.kZero);
         
         //Def below
-        megatag2Setup();
+        //megatag2Setup();
+        megatag1Setup();
     }
 
     public Translation2d setHub(){
@@ -409,11 +410,41 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         //updates position based on tag if nothings wrong 
         if(!doRejectUpdate){
             LimelightHelpers.SetRobotOrientation(Constants.LimelightConstants.ll_Name, getPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-            setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,999999));
+            setVisionMeasurementStdDevs(VecBuilder.fill(.3,.3,999999));
             addVisionMeasurement(
                 mt2.pose,
                 mt2.timestampSeconds);
         }
+    }
+    private void megatag1Setup(){
+
+        boolean doRejectUpdate = false;
+        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(Constants.LimelightConstants.ll_Name);
+ 
+        if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
+      {
+        if(mt1.rawFiducials[0].ambiguity > .7)
+        {
+          doRejectUpdate = true;
+        }
+        if(mt1.rawFiducials[0].distToCamera > 3)
+        {
+          doRejectUpdate = true;
+        }
+      }
+      if(mt1.tagCount == 0)
+      {
+        doRejectUpdate = true;
+      }
+
+        if(!doRejectUpdate)
+        {
+        setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
+        addVisionMeasurement(
+            mt1.pose,
+            mt1.timestampSeconds);
+        }
+
     }
 
     //Checks if robot is facing driver station (never use)
@@ -426,6 +457,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void yawNum(){
         SmartDashboard.putNumber("YAW", Math.abs(pigeon.getYaw().getValueAsDouble()%360));
     }
+    /* 
+    public void resetheadingtoGyro(){
+        Pose2d pose =getPose();
+        Rotation2d gyroHeading =Rotation2d.fromDegrees(pigeon.getYaw().getValueAsDouble());
+
+        resetPose(new Pose2d(pose.getTranslation(),gyroHeading));
+    }*/
 
     //Check what alliance and flips
     public void checkPerspective(){

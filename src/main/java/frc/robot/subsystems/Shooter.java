@@ -153,8 +153,8 @@ public class Shooter extends SubsystemBase {
         //Value: velocity of shooter
 
       shooterRPS.put(2.084979071669848,24.55); //close (tune again)
-      shooterRPS.put(3.0008923066606354,26.); //Standard
-      shooterRPS.put(4.434153557029914,32.5); //Far
+      shooterRPS.put(3.0008923066606354,25.5); //Standard
+      shooterRPS.put(4.434153557029914,32.); //Far
 
         //After Week 3 feature
         m_sysIdRoutine = new SysIdRoutine(

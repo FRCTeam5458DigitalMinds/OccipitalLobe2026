@@ -119,7 +119,7 @@ public class Robot extends TimedRobot {
 
 
         LimelightHelpers.SetIMUMode(dmllName, 4);
-        LimelightHelpers.SetIMUAssistAlpha("limelight", 0.01);
+        LimelightHelpers.SetIMUAssistAlpha(dmllName, 0.001);
     }
 
     @Override

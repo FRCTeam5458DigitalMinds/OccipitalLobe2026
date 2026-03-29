@@ -3,47 +3,46 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.1370756062767473,
-        "y": 4.1191012838801715
+        "x": 1.1537375178316684,
+        "y": 6.072838801711842
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.7483184335533097,
-        "y": 3.582395713988887
+        "x": 1.2886692505487352,
+        "y": 5.667679360824039
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Depot"
     },
     {
       "anchor": {
-        "x": 1.5677746077032806,
-        "y": 3.239272467902996
+        "x": 1.6971611982881591,
+        "y": 5.257703281027104
       },
       "prevControl": {
-        "x": 1.7197116035355735,
-        "y": 3.501175124953935
+        "x": 1.4774374258383078,
+        "y": 5.376957060088423
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Lower climb"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
-  "pointTowardsZones": [],
-  "eventMarkers": [
+  "pointTowardsZones": [
     {
-      "name": "Setup Climb",
-      "waypointRelativePos": 0.16475354490208627,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Setup Climb"
-        }
-      }
+      "fieldPosition": {
+        "x": 4.634,
+        "y": 4.067
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 0.5131667792032422,
+      "maxWaypointRelativePos": 0.75,
+      "name": "Hub"
     }
   ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,
@@ -54,7 +53,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -23.139461763211692
   },
   "reversed": false,
   "folder": "Climb",
