@@ -27,17 +27,17 @@ public class Indexer extends SubsystemBase {
     //Initializes the Indexer Motor
     TalonFX indexerMotor;
 
+    //Bang bang setup
     private BangBangController controller = new BangBangController();
 
     Double testRPS;
 
+    //SysID setup
     private final SysIdRoutine m_sysIdRoutine;
     private final VoltageOut m_voltReq = new VoltageOut(0.0);
 
+    //Feedfoward setup
     private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.IndexerConstants.kS,Constants.IndexerConstants.kV,Constants.IndexerConstants.kA);
-
-
-  
 
     public Indexer() {
 
@@ -53,7 +53,7 @@ public class Indexer extends SubsystemBase {
 
         SmartDashboard.putNumber("Index Test RPS", 76);
 
-        //After Week 3 feature
+        //Get kV,kS,kA,kP values
         m_sysIdRoutine = new SysIdRoutine(
               new SysIdRoutine.Config(
          null,        // Use default ramp rate (1 V/s)
@@ -71,13 +71,15 @@ public class Indexer extends SubsystemBase {
 
     }
 
+
+    //SysID cmds
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
       return m_sysIdRoutine.quasistatic(direction);
     }
+
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
       return m_sysIdRoutine.dynamic(direction);
     }
-
 
     //Sets the speed for the Indexer Motor
     public Command setSpeed(double OutputPercent){
@@ -87,7 +89,7 @@ public class Indexer extends SubsystemBase {
             }
         );
     }
-    //Just Bang Bang
+    //Bang Bang: testRPS
     public Command BBtestMotors(){
       return run(
         () -> {
@@ -96,17 +98,19 @@ public class Indexer extends SubsystemBase {
       );
     } 
 
+    //Bang Bang
     public void BBrps(double RPS){
         indexerMotor.setVoltage(controller.calculate(indexerMotor.getVelocity().getValueAsDouble(), RPS)*12 + 0.9*feedforward.calculate(RPS));
     }
 
-    //Sets the speed of the Indexer Motor
+    //Old seting speed
     public void setIndexer(double OutputPercent)
     {
         OutputPercent /= 100.0;
         indexerMotor.set(OutputPercent);
     }
 
+    //Never used
     public Command unjam(){
         return setSpeed(90).withTimeout(0.01) //90
             .andThen(Commands.waitSeconds(1.25))
@@ -114,10 +118,15 @@ public class Indexer extends SubsystemBase {
             .andThen(Commands.waitSeconds(0.25))
             ;
     }
+
      //Continuously runs
     @Override
     public void periodic() {
+
+      //Testing RPS
       testRPS = SmartDashboard.getNumber("Index Test RPS", 76);
+
+      //Current RPS
       SmartDashboard.putNumber("Index RPS", indexerMotor.getVelocity().getValueAsDouble());
     } 
 }

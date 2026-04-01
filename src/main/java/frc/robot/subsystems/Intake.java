@@ -22,6 +22,7 @@ public class Intake extends SubsystemBase {
   //max extenstion, min extension, other number...
   private final double[] setpoints = {14.00833984375,-3.219970703125};
 
+  //Set up position PID
   private final PositionVoltage m_request = new PositionVoltage(0).withSlot(0);
 
   public Intake() {
@@ -34,9 +35,7 @@ public class Intake extends SubsystemBase {
         intakeConfigs.Slot0.kP = Constants.IntakeConstants.intake_P;
         intakeConfigs.Slot0.kD = Constants.IntakeConstants.intake_D; 
 
-        intakeConfigs.Slot1.kP = Constants.IntakeConstants.intake_P-0.5; //WILL CHANGE
-        intakeConfigs.Slot0.kD = Constants.IntakeConstants.intake_D; 
-
+        intakeConfigs.Slot1.kP = Constants.IntakeConstants.intake_P-0.5; //Never used
 
         //Setups current limits
         intakeConfigs.CurrentLimits.withStatorCurrentLimit(60);
@@ -63,7 +62,8 @@ public class Intake extends SubsystemBase {
     {
         intakeMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(0));
     }
-    //Go to certain position based on setpoint index
+
+    //Go to setpoint but slower 
     public void slowerToSetpoint(int setpointIndex)
     {
         intakeMotor.setControl(m_request.withPosition(setpoints[setpointIndex]).withSlot(1));
@@ -75,13 +75,13 @@ public class Intake extends SubsystemBase {
     {
         intakeMotor.setControl(m_request.withPosition(setPoint).withSlot(0));
     }
+
+    //go to position but slower
     public void slowerCustomPosition(double setPoint){
         intakeMotor.setControl(m_request.withPosition(setPoint).withSlot(1));
 
     }
-    
-
-
+  
     //Get encoder value of the intake
     public double getPosition()
     {
@@ -90,11 +90,17 @@ public class Intake extends SubsystemBase {
         return intakeEncoder;
     }
 
-
     //Moves in based on current position
     public Command retractIntake(){
       return runOnce(
         () -> {customPosition(getPosition()-5);}
+      );
+    }
+
+    //Slower version of the function above
+    public Command SlowretractIntake(){
+      return runOnce(
+        () -> {slowerCustomPosition(getPosition()-10);}
       );
     }
 
@@ -104,26 +110,23 @@ public class Intake extends SubsystemBase {
         () -> {customPosition(getPosition()+5);}
       );
     }
-    public Command SlowretractIntake(){
-      return runOnce(
-        () -> {slowerCustomPosition(getPosition()-10);}
-      );
-    }
 
-    //Moves out based on current position
+    //Slower version of the function above
     public Command SlowextendIntake(){
       return runOnce(
         () -> {slowerCustomPosition(getPosition()+10);}
       );
     }
     
-    //works
+    //Slowly brings intake
     public Command slowRetract(){
       return runEnd(
         () -> {setIntake(7);},
         () -> {setIntake(0);}
       ); 
     }
+
+    //Both stopped using
     public boolean atEnd(){
       return getPosition() < setpoints[1]+((setpoints[1]+Math.abs(setpoints[0]))/2);
     }
@@ -132,8 +135,6 @@ public class Intake extends SubsystemBase {
     }
 
     /*public Command resetPosition() {
-      return intakeMotor.setPosition(-3.219970703125);
-
-
+      return intakeMotor.setPosition(-3.219970703125)
     }*/
 }

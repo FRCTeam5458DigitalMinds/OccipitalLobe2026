@@ -27,8 +27,10 @@ import static edu.wpi.first.units.Units.Volt;
 
 public class Feeder extends SubsystemBase {
     
+    //Set up motor
     private TalonFX feedMotor;
 
+    //Bang Bang setup
     private BangBangController controller = new BangBangController();
 
     Double testRPS;
@@ -36,9 +38,11 @@ public class Feeder extends SubsystemBase {
     //sets up velocity PID for slot 0
     final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
 
+    //Set up SysID
     private final SysIdRoutine m_sysIdRoutine;
     private final VoltageOut m_voltReq = new VoltageOut(0.0);
 
+    //Feedfoward setup
     private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.FeederConstants.kS,Constants.FeederConstants.kV,Constants.FeederConstants.kA);
 
     public Feeder() {
@@ -58,10 +62,11 @@ public class Feeder extends SubsystemBase {
         
         feedMotor.setNeutralMode(NeutralModeValue.Coast); 
         
+        //Default RPS
         SmartDashboard.putNumber("Feeder Test RPS", 75.13);
         //45
 
-        //SysID stuff
+        //Get kV,kS,kA,kP values
         m_sysIdRoutine = new SysIdRoutine(
               new SysIdRoutine.Config(
          null,        // Use default ramp rate (1 V/s)
@@ -79,6 +84,7 @@ public class Feeder extends SubsystemBase {
  
     }
 
+    //SysID Cmds
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
       return m_sysIdRoutine.quasistatic(direction);
     }
@@ -96,6 +102,7 @@ public class Feeder extends SubsystemBase {
           });
     }
 
+    //PID: runs desired RPS
     public Command PIDtreeRunMotors(){
       return run(
           () -> {
@@ -104,9 +111,7 @@ public class Feeder extends SubsystemBase {
       );
     }
 
-
-
-    //Just Bang Bang
+    //Bang Bang: runs desired RPS
     public Command BBtestMotors(){
       return run(
         () -> {
@@ -114,6 +119,8 @@ public class Feeder extends SubsystemBase {
         }
       );
     } 
+
+    //Stop motors
     public Command stopMotors(){
       return run(
         () -> {
@@ -123,25 +130,33 @@ public class Feeder extends SubsystemBase {
     } 
 
 
+    //Bang Bang
     public void BBrps(double RPS){
         feedMotor.setVoltage(controller.calculate(feedMotor.getVelocity().getValueAsDouble(), RPS)*12 + 0.9*feedforward.calculate(RPS));
     }
 
+    //PID
     public void setTargetRPS(double RPS){
       SmartDashboard.putNumber("RPS", feedMotor.getVelocity().getValueAsDouble());
       feedMotor.setControl(m_request.withVelocity(RPS));
     }
 
-    //Function version of setting speed
+
+    //Old set speed
      public void setFeeder(double OutputPercent)
     {
       OutputPercent /= 100.;
       feedMotor.set(-OutputPercent);
     }
+
     //Continuously runs
     @Override
     public void periodic() {
+
+      //Sets test RPS
       testRPS = SmartDashboard.getNumber("Feeder Test RPS", 75.13);
+
+      //Current Feeder RPS
       SmartDashboard.putNumber("Feeder RPS", feedMotor.getVelocity().getValueAsDouble());
 
     } 

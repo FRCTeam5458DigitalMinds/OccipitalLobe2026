@@ -354,6 +354,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     {
         resetPose(startingPose);
     }
+
+    //reset pose, but for autobuilder
     public void fieldResetPose()
     {
         resetPose(new Pose2d());
@@ -373,6 +375,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         megatag1Setup();
     }
 
+    //Sets hub position
     public Translation2d setHub(){
         Distance hubX;
         Distance hubY = Inches.of(317.69/2);
@@ -385,12 +388,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return new Translation2d(hubX.in(Meters), hubY.in(Meters));
     }
 
-    //Caluculte distance (in the works)
+    //Caluculte distance from hub using pose
     public double distToHub(){
         SmartDashboard.putNumber("Pose Distance", getPose().getTranslation().getDistance(setHub()));
         return getPose().getTranslation().getDistance(setHub());
     }
-
 
     //Megatag2 section
     private void megatag2Setup(){
@@ -416,35 +418,35 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 mt2.timestampSeconds);
         }
     }
+
+    //Megatag1 setup
     private void megatag1Setup(){
 
         boolean doRejectUpdate = false;
         LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(Constants.LimelightConstants.ll_Name);
  
-        if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
-      {
-        if(mt1.rawFiducials[0].ambiguity > .7)
-        {
-          doRejectUpdate = true;
-        }
-        if(mt1.rawFiducials[0].distToCamera > 3)
-        {
-          doRejectUpdate = true;
-        }
-      }
-      if(mt1.tagCount == 0)
-      {
-        doRejectUpdate = true;
-      }
+        //If there is one tag
+        if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1){
+            if(mt1.rawFiducials[0].ambiguity > .7){
+                doRejectUpdate = true;
+            }
 
-        if(!doRejectUpdate)
-        {
+            if(mt1.rawFiducials[0].distToCamera > 3){
+                doRejectUpdate = true;
+            }
+        }
+        //If there is no tag
+        if(mt1.tagCount == 0){
+            doRejectUpdate = true;
+        }
+
+        //Updates pose
+        if(!doRejectUpdate){
         setVisionMeasurementStdDevs(VecBuilder.fill(.5,.5,9999999));
         addVisionMeasurement(
             mt1.pose,
             mt1.timestampSeconds);
         }
-
     }
 
     //Checks if robot is facing driver station (never use)
@@ -479,7 +481,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     //Auto section
-
     private void configureAutoBuilder() {
         try {
             
@@ -541,7 +542,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         //In case everything fails
         return Commands.none();
-    }
-    
+    }   
 }
 

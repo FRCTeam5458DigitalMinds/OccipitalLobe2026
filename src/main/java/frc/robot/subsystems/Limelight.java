@@ -76,7 +76,9 @@ public class Limelight extends SubsystemBase{
       SmartDashboard.putNumber("LL-ID", dTarget);
       return dTarget;
    }
-   public int priorityTag(){
+   
+   //Filters tag
+      public int priorityTag(){
         RawFiducial[] currentFiducials = getFiducialData(); //this is the raw data from the limelight
         List<Integer> alCurrentTargetsIDs = new ArrayList<>(); //sets up list of IDs for the field
 
@@ -164,6 +166,7 @@ public class Limelight extends SubsystemBase{
           
    }
 
+   //Get distance from tag
    public Double getDistToNearestTag(){
 
     double distance = 2.2; //Default distance if no tag
@@ -185,38 +188,41 @@ public class Limelight extends SubsystemBase{
    }
 
    
+
+   //Gives more consistant shooter distance (not used anymore)
     private double filteredShooterDistance = 2.2;
     private boolean hasValidShooterDistance = false;
-   public void updateShooterDistance() {
 
-    double halfofBumper = 0.87/2; //Distance from center to edge of bumper
+    public void updateShooterDistance() {
 
-    RawFiducial[] currentFiducials = getFiducialData();
-    int targetId = priorityTag();
+        double halfofBumper = 0.87/2; //Distance from center to edge of bumper
 
-    for (RawFiducial fiducial : currentFiducials) {
-        if (fiducial.id == targetId) {
-            double measuredDistance = fiducial.distToRobot - halfofBumper;
+        RawFiducial[] currentFiducials = getFiducialData();
+        int targetId = priorityTag();
 
-            if (!hasValidShooterDistance) {
-                filteredShooterDistance = measuredDistance;
-            } else {
-                double delta = measuredDistance - filteredShooterDistance;
+        for (RawFiducial fiducial : currentFiducials) {
+            if (fiducial.id == targetId) {
+                double measuredDistance = fiducial.distToRobot - halfofBumper;
 
-                // Reject big single-frame jumps
-                if (Math.abs(delta) < 0.35) {
-                    filteredShooterDistance =
-                        filteredShooterDistance
-                        + 0.25 * delta;
+                if (!hasValidShooterDistance) {
+                    filteredShooterDistance = measuredDistance;
+                } else {
+                    double delta = measuredDistance - filteredShooterDistance;
+
+                    // Reject big single-frame jumps
+                    if (Math.abs(delta) < 0.35) {
+                        filteredShooterDistance =
+                            filteredShooterDistance
+                            + 0.25 * delta;
+                    }
                 }
-            }
 
-            hasValidShooterDistance = true;
-            SmartDashboard.putNumber("Shooter Raw Distance", measuredDistance);
-            SmartDashboard.putNumber("Shooter Filtered Distance", filteredShooterDistance);
-            return;
+                hasValidShooterDistance = true;
+                SmartDashboard.putNumber("Shooter Raw Distance", measuredDistance);
+                SmartDashboard.putNumber("Shooter Filtered Distance", filteredShooterDistance);
+                return;
+            }
         }
-    }
 
     // Keep last good value if no valid target this frame
     SmartDashboard.putNumber("Shooter Raw Distance", 2.2);
@@ -231,6 +237,7 @@ public class Limelight extends SubsystemBase{
         return hasValidShooterDistance;
     }
    
+
   public double limelight_aim_proportional(Double robotMaxAngularSpeed, double currentTX){    
     // kP (constant of proportionality)
     // this is a hand-tuned number that determines the aggressiveness of our proportional control loop
@@ -252,6 +259,7 @@ public class Limelight extends SubsystemBase{
     return targetingAngularVelocity;
   }
 
+  //Get velocity needed to move to certain TY
   public double limelight_range_proportional(Double robotMaxLinearSpeed){    
     double AutoalignkP = 1.0; 
 
@@ -274,6 +282,7 @@ public class Limelight extends SubsystemBase{
     return fiducials;
   }
   
+  //Checks if centered to tag
   public boolean isCentered(){
     /*double txnc = 99; //Assumes not centered if no tag
     RawFiducial[] crtFiducials = getFiducialData();
@@ -295,8 +304,8 @@ public class Limelight extends SubsystemBase{
     return false;
   }
 
-  //
-  //Note: if this doesn't work, make two comp pipelines for just red or blue tags
+
+  //Have limelight only use certain tags based on alliance
   public void setPriorityTags(){
     if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red){
         LimelightHelpers.SetFiducialIDFiltersOverride(dmllName, redTags);
@@ -307,9 +316,14 @@ public class Limelight extends SubsystemBase{
 
     }
   }
+
   @Override
   public void periodic(){
+
+    //Setup Red or Blue only tags
     setPriorityTags();
+
+    //Old distance from hub
     updateShooterDistance();
   }
 }

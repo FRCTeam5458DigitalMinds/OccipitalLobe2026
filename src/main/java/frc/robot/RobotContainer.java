@@ -83,8 +83,17 @@ public class RobotContainer {
     public RobotContainer(){
         configureNamedCommands();
 
-        //Make an auto chooser on the smart dashboard
-        autoChooser2 = AutoBuilder.buildAutoChooser();
+        // For convenience a programmer could change this when going to competition.
+        boolean isCompetition = true;
+
+        // Build an auto chooser. This will use Commands.none() as the default option.
+        // As an example, this will only show autos that start with "comp" while at
+        // competition as defined by the programmer
+        autoChooser2 = AutoBuilder.buildAutoChooserWithOptionsModifier(
+            (stream) -> isCompetition
+            ? stream.filter(auto -> auto.getName().startsWith("Comp"))
+            : stream
+        );
         
         SmartDashboard.putData("Auto Chooser", autoChooser2); 
 
@@ -111,9 +120,10 @@ public class RobotContainer {
             Commands.parallel(
                 //Part 1
                 //Two parts: run shooter and run hood depending on where the robot is facing
+
+                //Should have been the newer autoalign but not tested in auto yet
                 new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate).until(m_Limelight::isCentered).withTimeout(0.5).alongWith(hubShoot()),
-                //Part 2
-                //Add 1 Second delay of cmd group 2
+                
                 //Part 2
                 //Add 1 Second delay of cmd group 2
                 Commands.waitSeconds(1.5)
@@ -158,8 +168,7 @@ public class RobotContainer {
         );
 
         NamedCommands.registerCommand("Lower Climber", 
-            //m_Climber.toSetpoint(3)
-            Commands.none()
+            m_Climber.toSetpoint(3)
         );
 
         //Auto align
@@ -176,7 +185,7 @@ public class RobotContainer {
             )
         );
 
-
+        //Path finder (never used)
         NamedCommands.registerCommand("Move to Depot", drivetrain.pathfind_test("Move to Depot"));
         NamedCommands.registerCommand("neutral zone", drivetrain.pathfind_test("neutral zone"));
         NamedCommands.registerCommand("Half of neutral zone", drivetrain.pathfind_test("Half of neutral zone"));
@@ -244,35 +253,21 @@ public class RobotContainer {
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-        /* Main Commands */
+        /* Main Controls */
 
         // Reset the field-centric heading on back button press.
         joystick.back().onTrue(
-            Commands.sequence(
-                drivetrain.runOnce(
-                    drivetrain::seedFieldCentric
-                )
-                /*drivetrain.runOnce(
-                    () -> {drivetrain.fieldResetPose();}
-                )*/
-            )
+            drivetrain.runOnce(drivetrain::seedFieldCentric)
         );
 
-        // Controls
-
-        /*joystick.start().whileTrue(
-            new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate, m_LED).until(m_Limelight::isCentered)
-        );*/
-
-        //Main shoot
+        //Hub shoot
         joystick.rightTrigger().whileTrue(
             //Two parts: shooter & hood and everything else
             Commands.parallel(
                 //Part 1
                 //Two parts: run shooter and run hood depending on where the robot is facing
-                new AutoalignRotate(m_Limelight, drivetrain,MaxAngularRate).until(m_Limelight::isCentered).withTimeout(0.5).alongWith(hubShoot()),
-                //Part 2
-                //Add 1 Second delay of cmd group 2
+                //run shooter based on distance
+                new PoseAutoAlign(drivetrain).withTimeout(0.5).alongWith(hubShoot()),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
                 m_Indexer.setSpeed(-45).withTimeout(0.1)
@@ -280,23 +275,9 @@ public class RobotContainer {
                 .andThen(BBrestOfShoot())
             )
         );
-            
-        intakeCtrl();
-        //sysIDCtrl();
-        climbCtrl();
-        hoodCtrl();
-
-        
-        joystick.y().whileTrue(
-            m_Indexer.setSpeed(-45)
-        );
-      
-        /* */
-        //Testing purposes
-        //test shooter rps
 
         //Ferry Mode
-        /*joystick.rightBumper().whileTrue(
+        joystick.rightBumper().whileTrue(
             Commands.parallel(
                 //Part 1
                 //Two parts: run shooter and run hood depending on where the robot is facing
@@ -308,10 +289,24 @@ public class RobotContainer {
                 //Add 1 Second delay of cmd group 2
                 Commands.waitSeconds(1)
                 .andThen(
-                    restOfShoot()
+                    BBrestOfShoot()
                 )
             )
-        );*/
+        );
+
+        intakeCtrl();
+
+        //sysIDCtrl();
+        climbCtrl();
+        //hoodCtrl();
+
+        //Manual unjam
+        joystick.y().whileTrue(
+            m_Indexer.setSpeed(-45)
+        );
+      
+
+        /* 
         //Test
         joystick.rightBumper().whileTrue(
             Commands.parallel(
@@ -326,6 +321,7 @@ public class RobotContainer {
                 .andThen(BBrestOfShoot())
             )
         );
+        */
     }
 
     //When hub is inactive or at neutral zone
@@ -340,9 +336,10 @@ public class RobotContainer {
     }
 
     //Experimental shooting stuff
-    public Command testShoot(){
+    /*public Command testShoot(){
         return m_Shooter.PIDtreeRunMotors().alongWith(m_Hood.run(() -> {m_Hood.getPosition();}));
-    }
+    }*/
+    
     /* 
 //run shooter based on distance
     public Command mainShoot(){
@@ -359,21 +356,23 @@ public class RobotContainer {
     
     //Two parts: index & feeder
     //run both feeder and indexer
+
+    //Old version
    public Command restOfShoot(){
         return Commands.parallel(
             m_Feeder.setSpeed(90),
             m_Indexer.setSpeed(80),
             m_Roller.setSpeed(80),
             Commands.waitSeconds(1.5)
-                .andThen(
-                     Commands.repeatingSequence(
-                        m_Intake.retractIntake()
-                        .andThen(Commands.waitSeconds(0.5))
-                        .andThen(m_Intake.extendIntake())
-                        .andThen(Commands.waitSeconds(0.5))
-                    )
-                    //m_Intake.slowRetract().until(m_Intake::atEnd)
+            .andThen(
+                    Commands.repeatingSequence(
+                    m_Intake.retractIntake()
+                    .andThen(Commands.waitSeconds(0.5))
+                    .andThen(m_Intake.extendIntake())
+                    .andThen(Commands.waitSeconds(0.5))
                 )
+                //m_Intake.slowRetract().until(m_Intake::atEnd)
+            )
         );
    }
 
@@ -394,7 +393,6 @@ public class RobotContainer {
                 )
         );
    }
-
 
    public void sysIDCtrl(){
     /* Joystick B = Quasistatic forward
@@ -438,6 +436,8 @@ public class RobotContainer {
             Commands.runOnce(SignalLogger::stop)
         );
    }
+
+
    public void hoodCtrl(){
         //Test hood
         joystick.a().whileTrue(
@@ -447,7 +447,6 @@ public class RobotContainer {
             )
         );
 
-
         //Test hood
         joystick.b().whileTrue(
             m_Hood.runEnd(
@@ -455,14 +454,16 @@ public class RobotContainer {
                 () -> {m_Hood.setHood(0);}
             )
         );
-
    }
+
+    //Run climb 
    public void climbCtrl(){
-    //Run climb     
+        
         joystick.povLeft().whileTrue(
             m_Climber.toSetpoint(0)
         );
                 
+        //unclimb after auto
         joystick.povRight().and(joystick.b()).onTrue(
             m_Climber.toSetpoint(1).until(m_Climber::readytoRest)
         );
@@ -527,10 +528,9 @@ public class RobotContainer {
             )
         );*/
    }
+
    public void testCtrl(){
-
-    new PoseAutoAlign(drivetrain);
-
+        new PoseAutoAlign(drivetrain);
    }
     
     public Command getAutonomousCommand() {

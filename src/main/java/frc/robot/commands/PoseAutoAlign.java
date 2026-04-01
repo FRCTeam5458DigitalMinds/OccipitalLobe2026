@@ -28,47 +28,51 @@ public class PoseAutoAlign extends Command {
 
     public double AngleError;
     
+    //where shooter is on robot
     private static final Translation2d shooterOffset = new Translation2d(Inch.of(9).in(Meters), 0.184);
 
     public PoseAutoAlign(CommandSwerveDrivetrain drivetrain) {
         this.DRIVETRAIN = drivetrain;
         robotDrive = new SwerveRequest.FieldCentric().withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-
+        
         addRequirements(drivetrain);
-
     }
 
-    // puts the Target ID on the Dashboard
-    public void initialize() {
-    }
-
-    // runs
     public void execute() {
 
+        //Get drivetrain pose
         Pose2d pose = DRIVETRAIN.getPose();
 
+        //Setup shooter pose
         Translation2d shooterPose = pose.getTranslation().plus(shooterOffset.rotateBy(pose.getRotation()));
 
+        //Get difference between Hub and shooter pose
         Translation2d toHub = DRIVETRAIN.setHub().minus(shooterPose);
+
+        //Get the angle from the x-axis (vertical line)
         targetRotation = toHub.getAngle().getRadians();
 
+        //Difference between target rotation and pose rotation
         AngleError = targetRotation - pose.getRotation().getRadians();
+
+        //Wrap number between negative and positve pi
         AngleError = MathUtil.angleModulus(AngleError);
 
+        //Runs drivetrain with angle error
         DRIVETRAIN.setControl(
             robotDrive.withVelocityX(0)
                       .withVelocityY(0)
                       .withRotationalRate(AngleError*4)
-        );      
-        isFinished();
-    }
+        ); 
+    }   
 
-    // sets boolean for its done to stop the comand
+    //Once turned near hub, stop
     @Override
     public boolean isFinished() {
         return (Math.abs(AngleError) < Math.toRadians(1.5));
     }
 
+    //If interrupted, stop drivetrain
     @Override
     public void end(boolean interrupted){
         DRIVETRAIN.setControl(

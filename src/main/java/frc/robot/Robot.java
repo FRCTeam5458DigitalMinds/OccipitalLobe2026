@@ -24,7 +24,6 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.commands.PathfindingCommand;
 
 public class Robot extends TimedRobot {
-    public static final double RPS = 0;
 
     private Command m_autonomousCommand;
 
@@ -32,8 +31,6 @@ public class Robot extends TimedRobot {
 
     private final String dmllName = Constants.LimelightConstants.ll_Name;
     
-    private final Pigeon2 pigeon = new Pigeon2(TunerConstants.kPigeonId);
-
     /* log and replay timestamp and joystick data */
     private final HootAutoReplay m_timeAndJoystickReplay = new HootAutoReplay()
         .withTimestampReplay()
@@ -45,6 +42,8 @@ public class Robot extends TimedRobot {
     
     @Override
     public void robotInit() {
+    
+        //Setup elastic 
         SmartDashboard.putBoolean("Is Hub active?", false);
 
         PathfindingCommand.warmupCommand().schedule();
@@ -56,13 +55,14 @@ public class Robot extends TimedRobot {
 
         m_timeAndJoystickReplay.update();
 
+        //Setup which pipeline to use
         LimelightHelpers.setPipelineIndex(dmllName, m_robotContainer.getPipeline());
 
         // Retrieves the voltage currently entering the roboRIO
         double batteryVoltage = RobotController.getBatteryVoltage();
         
+        //Where the logs will go
         SignalLogger.setPath("/home/lvuser/logs/");
-
     
         // Sends the value to SmartDashboard under the key "Battery Voltage"
         SmartDashboard.putNumber("Battery Voltage", batteryVoltage);
@@ -73,6 +73,8 @@ public class Robot extends TimedRobot {
 
     @Override
     public void disabledInit() {
+
+        //Adds throttling(slowdown) of the limelight
         NetworkTableInstance.getDefault().getTable(dmllName).getEntry("throttle_set").setNumber(100);
     }
 
@@ -91,13 +93,16 @@ public class Robot extends TimedRobot {
         if (m_autonomousCommand != null) {
             CommandScheduler.getInstance().schedule(m_autonomousCommand);
         }
-        NetworkTableInstance.getDefault().getTable(dmllName).getEntry("throttle_set").setNumber(0);
 
+        //Removes throttling(slowdown) of the limelight
+        NetworkTableInstance.getDefault().getTable(dmllName).getEntry("throttle_set").setNumber(0);
     }
 
     @Override
     public void autonomousPeriodic() {
-        LimelightHelpers.SetIMUMode(dmllName, 0);
+        
+        //Set megatag 2 IMU mode (not used anymore)
+        LimelightHelpers.SetIMUMode(dmllName, 0); //External only
     }
 
     @Override
@@ -117,15 +122,18 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
 
-
-        LimelightHelpers.SetIMUMode(dmllName, 4);
-        LimelightHelpers.SetIMUAssistAlpha(dmllName, 0.001);
+        //Set megatag 2 IMU mode (not used anymore)
+        LimelightHelpers.SetIMUMode(dmllName, 4); //Internal IMU + External IMU
+        LimelightHelpers.SetIMUAssistAlpha(dmllName, 0.001); //// Set the complementary filter alpha
     }
 
     @Override
     public void teleopExit() {}
     
     //Other stuff that isn't the robot
+
+
+    //Check if hub is active
     public boolean isHubActive() {
         Optional<Alliance> alliance = DriverStation.getAlliance();
         // If we have no alliance, we cannot be enabled, therefore no hub.

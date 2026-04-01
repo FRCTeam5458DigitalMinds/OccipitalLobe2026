@@ -114,70 +114,40 @@ public class Shooter extends SubsystemBase {
             *Uses data points to estimate value based off key
         */
 
-        /* Old shooter table values
-        shooterRPS = new InterpolatingDoubleTreeMap();
-        //Key: distance 
-        //Value: velocity of shooter
-
-        //Will change
-        // new Numbers as of 3/16/2026
-        shooterRPS.put(1.9266899545847438,25.42); //Front of tower      
-        shooterRPS.put(1.9823946179552907,25.73); //Mid right
-        shooterRPS.put(2.661263186996523,28.6); //Corner
-        shooterRPS.put(2.2590145219495,28.4); //Near Left Trench
-        shooterRPS.put(2.157440140835241,27.5);//Near Right Trench
-
-        //Attempt #2
-        NewshooterRPS = new InterpolatingDoubleTreeMap();
-        
-        NewshooterRPS.put(2.5055061242497207,34.0);
-        NewshooterRPS.put(1.4178527091316189,27.0);
-        NewshooterRPS.put(1.6360094234791194,29.0);
-        NewshooterRPS.put(3.2319892011747924,36.0);
-        NewshooterRPS.put(1.1445679370483035,25.73);
-        //test later
-
-        NewershooterRPS = new InterpolatingDoubleTreeMap();
-        //With new silicon wrapping
-        NewershooterRPS.put(1.926470572923554,25.99); //Auto Position
-        NewershooterRPS.put(2.4573944066702516,27.3); // next to tower
-        NewershooterRPS.put(3.026646586664895,31.04); // front of depot
-        NewershooterRPS.put(3.428045861139117,34.01); // Corner (rough max)
-
-        //NewershooterRPS.put(1.1445679370483035,25.73); //
-      */
-
-
+      //5th attempt
       shooterRPS = new InterpolatingDoubleTreeMap();
         //Key: distance in meters
         //Value: velocity of shooter
 
       shooterRPS.put(2.084979071669848,24.55); //close (tune again)
-      shooterRPS.put(3.0008923066606354,25.5); //Standard
-      shooterRPS.put(4.434153557029914,32.); //Far
+      shooterRPS.put(3.0008923066606354,25.); //Standard
+      shooterRPS.put(4.434153557029914,32.5); //Far
 
-        //After Week 3 feature
-        m_sysIdRoutine = new SysIdRoutine(
-              new SysIdRoutine.Config(
-         null,        // Use default ramp rate (1 V/s)
-                  Volt.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
-          null,        // Use default timeout (10 s)
-                      // Log state with Phoenix SignalLogger class
-         (state) -> SignalLogger.writeString("Shooter state", state.toString())
-        ),
-          new SysIdRoutine.Mechanism(
+
+      //Default test RPS
+      SmartDashboard.putNumber("Shooter Test RPS", 27.02);        
+
+      //Get kV,kS,kA,kP values
+      m_sysIdRoutine = new SysIdRoutine(
+            new SysIdRoutine.Config(
+    null,        // Use default ramp rate (1 V/s)
+              Volt.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
+      null,        // Use default timeout (10 s)
+                  // Log state with Phoenix SignalLogger class
+              (state) -> SignalLogger.writeString("Shooter state", state.toString())
+          ),
+        new SysIdRoutine.Mechanism(
           (volts) -> lowerFlyMotor.setControl(m_voltReq.withOutput(volts.in(Volt))),
           null,
           this
         )
       );
 
-      SmartDashboard.putNumber("Shooter Test RPS", 27.02);
-      //35
-        
     }
 
   
+    //No PID or Bang Bang
+    
     /*//sets up a command for the speed of the motors
     public Command setSpeed(double percent){
       return run(
@@ -205,7 +175,7 @@ public class Shooter extends SubsystemBase {
     }*/
     
 
- 
+    //PID: runs desired RPS
     public Command PIDrunMotors(double FlyRPS){
       return run(
           () -> {
@@ -213,6 +183,8 @@ public class Shooter extends SubsystemBase {
           }
       );
     }
+
+    //Stop
     public Command stopMotors(){
       return run(
           () -> {
@@ -221,6 +193,7 @@ public class Shooter extends SubsystemBase {
       );
     }
 
+    //PID: uses distance from hub
     public Command PIDtreeRunMotors(){
       return run(
           () -> {
@@ -228,14 +201,17 @@ public class Shooter extends SubsystemBase {
           }
       );
     }
-    /*public Command PIDtestRunMotors(){
+
+    //PID: test RPS
+    public Command PIDtestRunMotors(){
       return run(
           () -> {
             setTargetRPS(testRPS);
           }
       );
-    }*/
-    //Just Bang Bang
+    }
+
+    //Bang Bang: test RPS
     public Command BBtestMotors(){
       return run(
         () -> {
@@ -253,19 +229,21 @@ public class Shooter extends SubsystemBase {
       );
     }
 
+    //Bang Bang
     public void BBrps(double RPS){
         lowerFlyMotor.setVoltage(controller.calculate(lowerFlyMotor.getVelocity().getValueAsDouble(), RPS)*12 + 0.9*feedforward.calculate(RPS));
     }
 
+    //PID
     public void setTargetRPS(double RPS){
       SmartDashboard.putNumber("RPS", lowerFlyMotor.getVelocity().getValueAsDouble());
       lowerFlyMotor.setControl(m_request.withVelocity(RPS));
     }
+
     //After week 3 feature
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
       return m_sysIdRoutine.quasistatic(direction);
     }
-
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
       return m_sysIdRoutine.dynamic(direction);
     }
@@ -273,11 +251,17 @@ public class Shooter extends SubsystemBase {
     //Continuously runs
    @Override
    public void periodic() {
+
+    //RPS from the interpolating table
     attemptRPS = shooterRPS.get(SmartDashboard.getNumber("Pose Distance", 27.02));
 
+    //Desired RPS
     SmartDashboard.putNumber("Attempted Shooter RPS", shooterRPS.get(SmartDashboard.getNumber("Pose Distance", 27.02)));
+
+    //Testing RPS from elastic
     testRPS = SmartDashboard.getNumber("Shooter Test RPS", 27.02);
+
+    //Current RPS
     SmartDashboard.putNumber("Shooter RPS", lowerFlyMotor.getVelocity().getValueAsDouble());
   }
-
 }
