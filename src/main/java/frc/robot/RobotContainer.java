@@ -212,9 +212,9 @@ public class RobotContainer {
             m_Feeder.setSpeed(0)
         );
         m_Hood.setDefaultCommand(
-            /*m_Hood.toSetpoint(0)
-            .andThen(m_Hood.runOnce(() -> {m_Hood.getPosition();}))*/
-            m_Hood.runOnce(() -> {m_Hood.getPosition();})
+            m_Hood.toSetpoint(0)
+            .andThen(m_Hood.runOnce(() -> {m_Hood.getPosition();}))
+            //m_Hood.runOnce(() -> {m_Hood.getPosition();})
         );
         m_Indexer.setDefaultCommand(
             m_Indexer.setSpeed(0)
@@ -267,7 +267,7 @@ public class RobotContainer {
                 //Part 1
                 //Two parts: run shooter and run hood depending on where the robot is facing
                 //run shooter based on distance
-                new PoseAutoAlign(drivetrain).withTimeout(0.5).alongWith(hubShoot()),
+                new PoseAutoAlign(drivetrain).withTimeout(0.3).alongWith(hubShoot()),
                 //Part 2
                 //Add 1 Second delay of cmd group 2
                 m_Indexer.setSpeed(-45).withTimeout(0.1)
@@ -329,10 +329,11 @@ public class RobotContainer {
         return m_Shooter.PIDrunMotors(25.5).alongWith(m_Hood.toSetpoint(1));
     }
 
-    //Auto align will change
+    //Hub is active
     public Command hubShoot(){
-        return m_Shooter.PIDtreeRunMotors().alongWith(m_Hood.run(() -> {m_Hood.getPosition();}))
-            ;
+        return m_Shooter.PIDtreeRunMotors();
+        /*m_Shooter.PIDrunMotors(27.5).withTimeout(0.25)
+                .andThen(m_Shooter.PIDtreeRunMotors());*/
     }
 
     //Experimental shooting stuff

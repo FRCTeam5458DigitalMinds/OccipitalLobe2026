@@ -90,6 +90,7 @@ public class Shooter extends SubsystemBase {
         globalConfigs.Slot0.kV = Constants.ShooterConstants.kV;
         globalConfigs.Slot0.kA = Constants.ShooterConstants.kA;
         globalConfigs.Slot0.kP = Constants.ShooterConstants.p_Value;
+        globalConfigs.Slot0.kD = Constants.ShooterConstants.d_Value;
         
         lowerFlyMotor = new TalonFX(Constants.ShooterConstants.lowerFlyWheel);
         

@@ -58,18 +58,28 @@ public class PoseAutoAlign extends Command {
         //Wrap number between negative and positve pi
         AngleError = MathUtil.angleModulus(AngleError);
 
+        AngleError *= 3.5;
+
+        // Clamp max speed
+        AngleError = MathUtil.clamp(AngleError, -6, 6);
+
+        // Add minimum output (helps small-angle response)
+        if (Math.abs(AngleError) < 0.15 && Math.abs(AngleError) > Math.toRadians(0.5)) {
+            AngleError = Math.copySign(0.15, AngleError);
+        }
         //Runs drivetrain with angle error
         DRIVETRAIN.setControl(
             robotDrive.withVelocityX(0)
                       .withVelocityY(0)
-                      .withRotationalRate(AngleError*4)
+                      .withRotationalRate(AngleError)
         ); 
+        
     }   
 
     //Once turned near hub, stop
     @Override
     public boolean isFinished() {
-        return (Math.abs(AngleError) < Math.toRadians(1.5));
+        return (Math.abs(AngleError) < Math.toRadians(0.5));
     }
 
     //If interrupted, stop drivetrain
