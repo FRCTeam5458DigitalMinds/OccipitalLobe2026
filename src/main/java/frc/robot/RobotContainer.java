@@ -105,7 +105,7 @@ public class RobotContainer {
         limelightPipelineChooser.addOption("Davis", 2);
         limelightPipelineChooser.addOption("Calibrate", 3);
         limelightPipelineChooser.addOption("Sac", 4);
-        //limelightPipelineChooser.addOption("Contra", 5);
+        limelightPipelineChooser.addOption("Contra", 6);
 
         SmartDashboard.putData("Pipeline Chooser", limelightPipelineChooser);
 
@@ -168,7 +168,7 @@ public class RobotContainer {
         );
 
         NamedCommands.registerCommand("Lower Climber", 
-            m_Climber.toSetpoint(3)
+            m_Climber.toSetpoint(2)
         );
 
         //Auto align
@@ -206,7 +206,7 @@ public class RobotContainer {
                     .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
-
+        
         //Stops the listed motors when not used
         m_Feeder.setDefaultCommand(
             m_Feeder.setSpeed(0)
@@ -260,44 +260,11 @@ public class RobotContainer {
             drivetrain.runOnce(drivetrain::seedFieldCentric)
         );
 
-        //Hub shoot
-        joystick.rightTrigger().whileTrue(
-            //Two parts: shooter & hood and everything else
-            Commands.parallel(
-                //Part 1
-                //Two parts: run shooter and run hood depending on where the robot is facing
-                //run shooter based on distance
-                new PoseAutoAlign(drivetrain).withTimeout(0.3).alongWith(hubShoot()),
-                //Part 2
-                //Add 1 Second delay of cmd group 2
-                m_Indexer.setSpeed(-45).withTimeout(0.1)
-                .andThen(Commands.waitSeconds(1.5))
-                .andThen(BBrestOfShoot())
-            )
-        );
-
-        //Ferry Mode
-        joystick.rightBumper().whileTrue(
-            Commands.parallel(
-                //Part 1
-                //Two parts: run shooter and run hood depending on where the robot is facing
-                Commands.parallel(
-                    //run shooter based on distance
-                    ferryShoot()
-                ),
-                //Part 2
-                //Add 1 Second delay of cmd group 2
-                Commands.waitSeconds(1)
-                .andThen(
-                    BBrestOfShoot()
-                )
-            )
-        );
-
+        //testMode();
+        shootCtrl(); //96
         intakeCtrl();
-
         //sysIDCtrl();
-        climbCtrl();
+        //climbCtrl();
         //hoodCtrl();
 
         //Manual unjam
@@ -305,7 +272,6 @@ public class RobotContainer {
             m_Indexer.setSpeed(-45)
         );
       
-
         /* 
         //Test
         joystick.rightBumper().whileTrue(
@@ -324,6 +290,43 @@ public class RobotContainer {
         */
     }
 
+    public void shootCtrl(){
+        //Hub shoot
+        joystick.rightTrigger().whileTrue(
+            //Two parts: shooter & hood and everything else
+            Commands.parallel(
+                //Part 1
+                //Two parts: run shooter and run hood depending on where the robot is facing
+                //run shooter based on distance
+                new PoseAutoAlign(drivetrain).withTimeout(0.3).alongWith(hubShoot()),
+                //Part 2
+                //Add 1 Second delay of cmd group 2
+                m_Indexer.setSpeed(-45).withTimeout(0.1)
+                .andThen(Commands.waitSeconds(1.5))
+                .andThen(BBrestOfShoot())
+            )
+        );
+
+         //Ferry Mode
+        joystick.rightBumper().whileTrue(
+            Commands.parallel(
+                //Part 1
+                //Two parts: run shooter and run hood depending on where the robot is facing
+                Commands.parallel(
+                    //run shooter based on distance
+                    ferryShoot()
+                ),
+                //Part 2
+                //Add 1 Second delay of cmd group 2
+                Commands.waitSeconds(1)
+                .andThen(
+                    BBrestOfShoot()
+                )
+            )
+        );
+
+    }
+
     //When hub is inactive or at neutral zone
     public Command ferryShoot(){
         return m_Shooter.PIDrunMotors(25.5).alongWith(m_Hood.toSetpoint(1));
@@ -335,11 +338,6 @@ public class RobotContainer {
         /*m_Shooter.PIDrunMotors(27.5).withTimeout(0.25)
                 .andThen(m_Shooter.PIDtreeRunMotors());*/
     }
-
-    //Experimental shooting stuff
-    /*public Command testShoot(){
-        return m_Shooter.PIDtreeRunMotors().alongWith(m_Hood.run(() -> {m_Hood.getPosition();}));
-    }*/
     
     /* 
 //run shooter based on distance
@@ -529,11 +527,49 @@ public class RobotContainer {
             )
         );*/
    }
-
-   public void testCtrl(){
-        new PoseAutoAlign(drivetrain);
+    //Experimental shooting stuff
+   public void testMode(){
+        //Hub shoot
+        joystick.rightTrigger().whileTrue(
+            //Two parts: shooter & hood and everything else
+            Commands.parallel(
+                //Part 1
+                //Two parts: run shooter and run hood depending on where the robot is facing
+                //run shooter based on distance
+                Commands.parallel(
+                    new PoseAutoAlign(drivetrain).withTimeout(0.3),
+                    testShoot()
+                ),
+                //Part 2
+                //Add 1 Second delay of cmd group 2
+                m_Indexer.setSpeed(-45).withTimeout(0.1)
+                .andThen(Commands.waitSeconds(1.5))
+                .andThen(testRestOfShoot())
+            )
+        );
    }
-    
+    public Command testShoot(){
+        return m_Shooter.PIDtestRunMotors();
+    }
+
+    public Command testRestOfShoot(){
+        return Commands.parallel(
+            m_Feeder.PIDtreeRunMotors(),
+            m_Indexer.PIDrunMotors(),
+            m_Roller.setSpeed(80),
+            Commands.waitSeconds(1.5)
+                .andThen(
+                     Commands.repeatingSequence(
+                        m_Intake.retractIntake()
+                        .andThen(Commands.waitSeconds(0.5))
+                        .andThen(m_Intake.extendIntake())
+                        .andThen(Commands.waitSeconds(0.5))
+                    )
+                    //m_Intake.slowRetract().until(m_Intake::atEnd)
+                )
+        );
+    }
+
     public Command getAutonomousCommand() {
         return autoChooser2.getSelected();
     }

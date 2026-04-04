@@ -45,6 +45,8 @@ public class Feeder extends SubsystemBase {
     //Feedfoward setup
     private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.FeederConstants.kS,Constants.FeederConstants.kV,Constants.FeederConstants.kA);
 
+    private double lastKP = -1;
+
     public Feeder() {
         
         feedMotor = new TalonFX(Constants.FeederConstants.feeder);
@@ -65,6 +67,9 @@ public class Feeder extends SubsystemBase {
         //Default RPS
         SmartDashboard.putNumber("Feeder Test RPS", 75.13);
         //45
+
+        SmartDashboard.putNumber("Feeder P_value", Constants.FeederConstants.p_Value);
+
 
         //Get kV,kS,kA,kP values
         m_sysIdRoutine = new SysIdRoutine(
@@ -159,6 +164,28 @@ public class Feeder extends SubsystemBase {
       //Current Feeder RPS
       SmartDashboard.putNumber("Feeder RPS", feedMotor.getVelocity().getValueAsDouble());
 
+
+      double newKP = SmartDashboard.getNumber("Feeder P_value", Constants.ShooterConstants.p_Value);
+
+      if (newKP != lastKP) {
+            TalonFXConfiguration globalConfigs = new TalonFXConfiguration();
+            globalConfigs.CurrentLimits.withStatorCurrentLimit(60);
+            globalConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
+            
+            //setups the PID value for the intake
+          
+            globalConfigs.Slot0.kS = Constants.ShooterConstants.kS;
+            globalConfigs.Slot0.kV = Constants.ShooterConstants.kV;
+            globalConfigs.Slot0.kA = Constants.ShooterConstants.kA;
+            globalConfigs.Slot0.kP = newKP;
+            globalConfigs.Slot0.kD = Constants.ShooterConstants.d_Value;
+
+            feedMotor.getConfigurator().apply(globalConfigs);
+
+            lastKP = newKP;
+      }
+    
     } 
+
 
 }

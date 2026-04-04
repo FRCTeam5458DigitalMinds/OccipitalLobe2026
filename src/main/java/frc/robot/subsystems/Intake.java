@@ -38,7 +38,7 @@ public class Intake extends SubsystemBase {
         intakeConfigs.Slot1.kP = Constants.IntakeConstants.intake_P-0.5; //Never used
 
         //Setups current limits
-        intakeConfigs.CurrentLimits.withStatorCurrentLimit(60);
+        intakeConfigs.CurrentLimits.withStatorCurrentLimit(40);
         intakeConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
 
         intakeMotor.getConfigurator().apply(intakeConfigs);
@@ -93,7 +93,7 @@ public class Intake extends SubsystemBase {
     //Moves in based on current position
     public Command retractIntake(){
       return runOnce(
-        () -> {customPosition(getPosition()-5);}
+        () -> {customPosition(getPosition()-8);}
       );
     }
 
@@ -107,7 +107,7 @@ public class Intake extends SubsystemBase {
     //Moves out based on current position
     public Command extendIntake(){
       return runOnce(
-        () -> {customPosition(getPosition()+5);}
+        () -> {customPosition(getPosition()+8);}
       );
     }
 

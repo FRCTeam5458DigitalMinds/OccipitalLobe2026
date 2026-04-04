@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Volt;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -74,6 +75,10 @@ public class Shooter extends SubsystemBase {
     Double attemptRPS;
 
     SysIdRoutine routine;
+
+
+    double multiplier;
+    private double lastKP = -1;
     public Shooter() {
 
         //m_shooterFeedback.setTolerance(Constants.ShooterConstants.kShooterToleranceRPS);
@@ -108,6 +113,8 @@ public class Shooter extends SubsystemBase {
         upperFlyMotor.setNeutralMode(NeutralModeValue.Coast);
 
 
+
+
         /* 
           Context to Interpolating Double Tree Map:
           
@@ -120,13 +127,26 @@ public class Shooter extends SubsystemBase {
         //Key: distance in meters
         //Value: velocity of shooter
 
-      shooterRPS.put(2.084979071669848,24.55); //close (tune again)
-      shooterRPS.put(3.0008923066606354,25.); //Standard
-      shooterRPS.put(4.434153557029914,32.5); //Far
+      /*shooterRPS.put(2.084979071669848,24.55); //close (tune again)
+      shooterRPS.put(3.0008923066606354,27.); //Standard
+      shooterRPS.put(4.434153557029914,32.5); //Far*/
 
+
+      shooterRPS.put(1.7,22.58); //close (tune again)
+      shooterRPS.put( 2.889059 ,27.02); //Standard
+      shooterRPS.put(3.873 ,30.17); //Far
+      // 1.7 22.58 close
+      // 2.889059 27.02 Standard
+      // 3.873 30.17 Far
 
       //Default test RPS
-      SmartDashboard.putNumber("Shooter Test RPS", 27.02);        
+      SmartDashboard.putNumber("Shooter Test RPS", 27.02);    
+      
+      //Default P_value
+      SmartDashboard.putNumber("Shooter P_value", Constants.ShooterConstants.p_Value);
+
+      SmartDashboard.putNumber("Multiplier", 0.96);
+
 
       //Get kV,kS,kA,kP values
       m_sysIdRoutine = new SysIdRoutine(
@@ -254,15 +274,40 @@ public class Shooter extends SubsystemBase {
    public void periodic() {
 
     //RPS from the interpolating table
-    attemptRPS = shooterRPS.get(SmartDashboard.getNumber("Pose Distance", 27.02));
+    attemptRPS = multiplier*shooterRPS.get(SmartDashboard.getNumber("Pose Distance", 27.02));
 
     //Desired RPS
     SmartDashboard.putNumber("Attempted Shooter RPS", shooterRPS.get(SmartDashboard.getNumber("Pose Distance", 27.02)));
+
+    //Multiplier
+    multiplier = SmartDashboard.getNumber("Multiplier", 0.96);
+
 
     //Testing RPS from elastic
     testRPS = SmartDashboard.getNumber("Shooter Test RPS", 27.02);
 
     //Current RPS
     SmartDashboard.putNumber("Shooter RPS", lowerFlyMotor.getVelocity().getValueAsDouble());
+
+    double newKP = SmartDashboard.getNumber("Shooter P_value", Constants.ShooterConstants.p_Value);
+
+    if (newKP != lastKP) {
+          TalonFXConfiguration globalConfigs = new TalonFXConfiguration();
+          globalConfigs.CurrentLimits.withStatorCurrentLimit(60);
+          globalConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
+          
+          //setups the PID value for the intake
+        
+          globalConfigs.Slot0.kS = Constants.ShooterConstants.kS;
+          globalConfigs.Slot0.kV = Constants.ShooterConstants.kV;
+          globalConfigs.Slot0.kA = Constants.ShooterConstants.kA;
+          globalConfigs.Slot0.kP = newKP;
+          globalConfigs.Slot0.kD = Constants.ShooterConstants.d_Value;
+
+            lowerFlyMotor.getConfigurator().apply(globalConfigs);
+            upperFlyMotor.getConfigurator().apply(globalConfigs);
+
+            lastKP = newKP;
+    }
   }
 }

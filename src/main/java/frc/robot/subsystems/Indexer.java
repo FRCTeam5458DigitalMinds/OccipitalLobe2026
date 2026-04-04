@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -39,11 +40,22 @@ public class Indexer extends SubsystemBase {
     //Feedfoward setup
     private final SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.IndexerConstants.kS,Constants.IndexerConstants.kV,Constants.IndexerConstants.kA);
 
+    final VelocityVoltage m_request = new VelocityVoltage(0).withSlot(0);
+
+
+    private double lastKP = -1;
+
+
     public Indexer() {
 
         //Sets up the settings for the Indexer Motor
         indexerMotor = new TalonFX(Constants.IndexerConstants.indexMotor);
         TalonFXConfiguration indexerConfigs = new TalonFXConfiguration();
+        indexerConfigs.Slot0.kS = Constants.IndexerConstants.kS;
+        indexerConfigs.Slot0.kV = Constants.IndexerConstants.kV;
+        indexerConfigs.Slot0.kA = Constants.IndexerConstants.kA;
+        indexerConfigs.Slot0.kP = Constants.IndexerConstants.p_Value;
+        
         indexerConfigs.CurrentLimits.withStatorCurrentLimit(65);
         indexerConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
 
@@ -69,6 +81,8 @@ public class Indexer extends SubsystemBase {
         )
       );
 
+      SmartDashboard.putNumber("Index P_value", Constants.IndexerConstants.p_Value);
+
     }
 
 
@@ -89,6 +103,16 @@ public class Indexer extends SubsystemBase {
             }
         );
     }
+
+    public Command PIDrunMotors(){
+        return run(
+            () -> {
+              setTargetRPS(testRPS);
+            }
+        );
+    }
+
+
     //Bang Bang: testRPS
     public Command BBtestMotors(){
       return run(
@@ -101,6 +125,11 @@ public class Indexer extends SubsystemBase {
     //Bang Bang
     public void BBrps(double RPS){
         indexerMotor.setVoltage(controller.calculate(indexerMotor.getVelocity().getValueAsDouble(), RPS)*12 + 0.9*feedforward.calculate(RPS));
+    }
+
+    //PID
+    public void setTargetRPS(double RPS){
+      indexerMotor.setControl(m_request.withVelocity(RPS));
     }
 
     //Old seting speed
@@ -128,5 +157,28 @@ public class Indexer extends SubsystemBase {
 
       //Current RPS
       SmartDashboard.putNumber("Index RPS", indexerMotor.getVelocity().getValueAsDouble());
+    
+
+      double newKP = SmartDashboard.getNumber("Index P_value", Constants.ShooterConstants.p_Value);
+
+      if (newKP != lastKP) {
+          TalonFXConfiguration globalConfigs = new TalonFXConfiguration();
+          globalConfigs.CurrentLimits.withStatorCurrentLimit(60);
+          globalConfigs.CurrentLimits.withStatorCurrentLimitEnable(true);
+          
+          //setups the PID value for the intake
+        
+          globalConfigs.Slot0.kS = Constants.ShooterConstants.kS;
+          globalConfigs.Slot0.kV = Constants.ShooterConstants.kV;
+          globalConfigs.Slot0.kA = Constants.ShooterConstants.kA;
+          globalConfigs.Slot0.kP = newKP;
+          globalConfigs.Slot0.kD = Constants.ShooterConstants.d_Value;
+
+            indexerMotor.getConfigurator().apply(globalConfigs);
+
+            lastKP = newKP;
+      }
+      
+    
     } 
 }

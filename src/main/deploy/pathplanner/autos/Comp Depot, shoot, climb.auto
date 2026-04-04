@@ -65,6 +65,12 @@
           "data": {
             "name": "top climb"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Lower Climber"
+          }
         }
       ]
     }
